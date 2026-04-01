@@ -30,6 +30,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Upload registry manifest
-        run: gh release upload ${{ github.ref_name }} registry/latest.json#manifest.json --clobber
+        run: cp registry/latest.json manifest.json && gh release upload ${{ github.ref_name }} manifest.json --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
