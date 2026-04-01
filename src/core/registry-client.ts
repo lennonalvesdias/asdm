@@ -13,7 +13,7 @@ import { parseRegistryUrl } from './config.js'
 import type { AsdmManifest } from './manifest.js'
 
 const GITHUB_API_BASE = 'https://api.github.com'
-const GITHUB_RAW_BASE = 'https://github.com'
+const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com'
 const FETCH_TIMEOUT_MS = 10_000
 
 export interface RegistryClientOptions {
@@ -162,14 +162,14 @@ export class RegistryClient {
   }
 
   /**
-   * Download a specific asset file from a GitHub Release.
+   * Download a specific asset file from the registry via raw GitHub content.
    *
    * @param assetPath - Registry-relative path (e.g., "agents/code-reviewer.asdm.md")
    * @param version - Release tag version (e.g., "1.0.0")
    */
   async downloadAsset(assetPath: string, version: string): Promise<string> {
-    // Asset download URL from GitHub Releases
-    const url = `${GITHUB_RAW_BASE}/${this.org}/${this.repo}/releases/download/v${version}/${assetPath}`
+    // Raw GitHub content URL — serves tagged registry files without path normalization
+    const url = `${GITHUB_RAW_BASE}/${this.org}/${this.repo}/refs/tags/v${version}/registry/${assetPath}`
 
     const response = await fetchWithRetry(
       url,

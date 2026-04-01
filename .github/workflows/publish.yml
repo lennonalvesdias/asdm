@@ -29,7 +29,9 @@ jobs:
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Upload registry manifest
-        run: cp registry/latest.json manifest.json && gh release upload ${{ github.ref_name }} manifest.json --clobber
+      - name: Upload registry assets
+        run: |
+          cp registry/latest.json manifest.json
+          gh release upload ${{ github.ref_name }} manifest.json --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
