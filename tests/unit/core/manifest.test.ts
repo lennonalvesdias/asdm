@@ -4,8 +4,6 @@ import type { AsdmManifest } from '../../../src/core/manifest.js'
 
 const MANIFEST: AsdmManifest = {
   version: '1.0.0',
-  built_at: '2026-03-31T12:00:00Z',
-  commit_sha: 'abc1234',
   policy: {
     allowed_profiles: ['base', 'fullstack-engineer'],
     allowed_providers: ['opencode', 'claude-code', 'copilot'],

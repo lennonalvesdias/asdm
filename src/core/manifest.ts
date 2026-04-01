@@ -28,8 +28,6 @@ export interface ManifestProfile {
 export interface AsdmManifest {
   $schema?: string
   version: string
-  built_at: string
-  commit_sha: string
   policy: CorporatePolicy
   profiles: Record<string, ManifestProfile>
   assets: Record<string, ManifestAsset>
@@ -130,8 +128,6 @@ export function validateManifest(manifest: unknown): manifest is AsdmManifest {
   const m = manifest as Record<string, unknown>
   return (
     typeof m['version'] === 'string' &&
-    typeof m['built_at'] === 'string' &&
-    typeof m['commit_sha'] === 'string' &&
     typeof m['policy'] === 'object' &&
     typeof m['profiles'] === 'object' &&
     typeof m['assets'] === 'object'

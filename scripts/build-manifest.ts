@@ -13,7 +13,6 @@ import { createHash } from 'node:crypto'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parse as parseYaml } from 'yaml'
-import { execSync } from 'node:child_process'
 
 const __filename = fileURLToPath(import.meta.url)
 const ROOT = resolve(dirname(__filename), '..')
@@ -48,8 +47,6 @@ interface ManifestPolicy {
 interface Manifest {
   $schema: string
   version: string
-  built_at: string
-  commit_sha: string
   policy: ManifestPolicy
   profiles: Record<string, ManifestProfile>
   assets: Record<string, AssetEntry>
@@ -76,14 +73,6 @@ function extractFrontmatterVersion(content: string, label: string): string {
   } catch {
     console.warn(`  ⚠  Could not parse frontmatter in ${label}, defaulting version to 0.0.0`)
     return '0.0.0'
-  }
-}
-
-function getGitCommitSha(): string {
-  try {
-    return execSync('git rev-parse HEAD', { cwd: ROOT, encoding: 'utf-8' }).trim()
-  } catch {
-    return '0000000000000000000000000000000000000000'
   }
 }
 
@@ -212,10 +201,6 @@ async function main(): Promise<void> {
   const version = pkg.version
 
   console.log(`📦 Version:    ${version}`)
-
-  const commitSha = getGitCommitSha()
-  console.log(`🔑 Commit SHA: ${commitSha.slice(0, 12)}...`)
-
   console.log('\n📂 Scanning registry:')
 
   const [agentEntries, skillEntries, commandEntries, profiles, policy] = await Promise.all([
@@ -237,8 +222,6 @@ async function main(): Promise<void> {
   const manifest: Manifest = {
     $schema: 'https://asdm.dev/schemas/manifest.schema.json',
     version,
-    built_at: new Date().toISOString(),
-    commit_sha: commitSha,
     policy,
     profiles,
     assets,

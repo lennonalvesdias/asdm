@@ -38,7 +38,6 @@ describe('readLockfile / writeLockfile', () => {
     const lockfile = buildLockfile({
       cliVersion: '0.1.0',
       manifestVersion: '1.0.0',
-      manifestCommit: 'abc123',
       registry: 'github://org/repo',
       profile: 'fullstack-engineer',
       resolvedProfiles: ['base', 'fullstack-engineer'],
@@ -63,7 +62,6 @@ describe('lockfileExists', () => {
     const lockfile = buildLockfile({
       cliVersion: '0.1.0',
       manifestVersion: '1.0.0',
-      manifestCommit: 'abc123',
       registry: 'github://org/repo',
       profile: 'base',
       resolvedProfiles: ['base'],
@@ -88,7 +86,6 @@ describe('diffLockfiles', () => {
     const current = buildLockfile({
       cliVersion: '0.1.0',
       manifestVersion: '1.0.0',
-      manifestCommit: 'abc',
       registry: 'github://org/repo',
       profile: 'base',
       resolvedProfiles: ['base'],
@@ -102,7 +99,6 @@ describe('diffLockfiles', () => {
     const current = buildLockfile({
       cliVersion: '0.1.0',
       manifestVersion: '1.0.0',
-      manifestCommit: 'abc',
       registry: 'github://org/repo',
       profile: 'base',
       resolvedProfiles: ['base'],

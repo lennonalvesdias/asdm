@@ -29,7 +29,6 @@ export interface AsdmLockfile {
   synced_at: string
   cli_version: string
   manifest_version: string
-  manifest_commit?: string
   registry: string
   profile: string
   resolved_profiles: string[]
@@ -134,7 +133,6 @@ export function createLockEntry(
 export function buildLockfile(params: {
   cliVersion: string
   manifestVersion: string
-  manifestCommit: string
   registry: string
   profile: string
   resolvedProfiles: string[]
@@ -145,7 +143,6 @@ export function buildLockfile(params: {
     synced_at: new Date().toISOString(),
     cli_version: params.cliVersion,
     manifest_version: params.manifestVersion,
-    manifest_commit: params.manifestCommit,
     registry: params.registry,
     profile: params.profile,
     resolved_profiles: params.resolvedProfiles,

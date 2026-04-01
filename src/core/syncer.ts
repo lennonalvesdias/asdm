@@ -282,7 +282,6 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
     const lockfile = buildLockfile({
       cliVersion,
       manifestVersion: manifest.version,
-      manifestCommit: manifest.commit_sha,
       registry: resolvedConfig.registry,
       profile: resolvedConfig.profile,
       resolvedProfiles: resolvedProfile.resolvedFrom,

@@ -1,8 +1,6 @@
 {
   "$schema": "https://asdm.dev/schemas/manifest.schema.json",
   "version": "0.1.0",
-  "built_at": "2026-04-01T03:40:30.296Z",
-  "commit_sha": "91ecb6c1ac1d27af0b4d81ae30d58c9d2230ab1b",
   "policy": {
     "locked_fields": [
       "telemetry",
