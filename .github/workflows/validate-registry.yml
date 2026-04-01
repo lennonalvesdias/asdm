@@ -5,6 +5,7 @@ on:
     paths:
       - 'registry/**'
       - 'schemas/**'
+      - 'scripts/**'
 
 jobs:
   validate:
