@@ -1,5 +1,5 @@
 {
-  "name": "@asdm/cli",
+  "name": "asdm-cli",
   "version": "0.1.0",
   "description": "Agentic Software Delivery Model — CLI for unified AI coding assistant governance",
   "type": "module",
