@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asdm.dev/schemas/overlay.schema.json",
+  "title": "ASDM Overlay",
+  "description": "Schema for .asdm-overlay.json (personal dev customizations — additive only)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "additional_skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "source": {
+            "type": "string",
+            "enum": ["local", "github"]
+          },
+          "path": { "type": "string" },
+          "repo": { "type": "string" }
+        }
+      }
+    },
+    "additional_agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "source": {
+            "type": "string",
+            "enum": ["local", "github"]
+          },
+          "path": { "type": "string" },
+          "repo": { "type": "string" }
+        }
+      }
+    },
+    "provider_overrides": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "opencode": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "mcp_servers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "command"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "command": { "type": "string" },
+                  "args": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

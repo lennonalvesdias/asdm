@@ -1,0 +1,19 @@
+name: base
+description: "Minimal base profile with essential agents"
+
+agents:
+  - code-reviewer
+  - documentation-writer
+
+skills:
+  - plan-protocol
+  - code-review
+
+commands:
+  - check-file
+  - summarize
+
+providers:
+  - opencode
+  - claude-code
+  - copilot

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asdm.dev/schemas/lock.schema.json",
+  "title": "ASDM Lockfile",
+  "description": "Schema for .asdm-lock.json",
+  "type": "object",
+  "required": ["synced_at", "cli_version", "manifest_version", "registry", "profile", "files"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "synced_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cli_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "manifest_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "manifest_commit": {
+      "type": "string"
+    },
+    "registry": {
+      "type": "string"
+    },
+    "profile": {
+      "type": "string"
+    },
+    "resolved_profiles": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "files": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["sha256", "source", "adapter", "version"],
+        "additionalProperties": false,
+        "properties": {
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "source": {
+            "type": "string"
+          },
+          "adapter": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "managed": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    }
+  }
+}

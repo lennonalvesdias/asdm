@@ -1,0 +1,29 @@
+name: Validate Registry
+
+on:
+  push:
+    paths:
+      - 'registry/**'
+      - 'schemas/**'
+
+jobs:
+  validate:
+    name: Validate Registry Assets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      - run: npm ci
+      - name: Build manifest
+        run: npx tsx scripts/build-manifest.ts
+      - name: Validate registry
+        run: npx tsx scripts/validate.ts
+      - name: Check for uncommitted manifest changes
+        run: |
+          if ! git diff --exit-code registry/; then
+            echo "Registry manifest is out of date. Run 'npm run build:manifest' and commit the result."
+            exit 1
+          fi

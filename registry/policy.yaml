@@ -1,0 +1,14 @@
+version: "1.0.0"
+allowed_profiles:
+  - base
+  - fullstack-engineer
+  - data-analytics
+  - mobile
+  - security
+default_profile: base
+allow_custom_agents: false
+require_integrity_check: true
+emit_targets:
+  - opencode
+  - claude-code
+  - copilot

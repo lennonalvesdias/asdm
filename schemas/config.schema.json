@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asdm.dev/schemas/config.schema.json",
+  "title": "ASDM Project Config",
+  "description": "Schema for .asdm.json (committed project config)",
+  "type": "object",
+  "required": ["registry", "profile"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "registry": {
+      "type": "string",
+      "pattern": "^github://[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$",
+      "description": "Registry URL in github://{org}/{repo} format"
+    },
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["opencode", "claude-code", "copilot"]
+      },
+      "uniqueItems": true
+    }
+  }
+}

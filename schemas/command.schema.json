@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asdm.dev/schemas/command.schema.json",
+  "title": "ASDM Command",
+  "description": "Schema for ASDM command .asdm.md frontmatter",
+  "type": "object",
+  "required": ["name", "type", "description", "version"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "type": {
+      "type": "string",
+      "const": "command"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 200
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "providers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "opencode": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "slash_command": { "type": "string" },
+            "agent": { "type": "string" }
+          }
+        },
+        "claude-code": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "slash_command": { "type": "string" },
+            "agent": { "type": "string" }
+          }
+        },
+        "copilot": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "slash_command": { "type": "string" },
+            "agent": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asdm.dev/schemas/agent.schema.json",
+  "title": "ASDM Agent",
+  "description": "Schema for ASDM agent .asdm.md frontmatter",
+  "type": "object",
+  "required": ["name", "type", "description", "version"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Kebab-case agent identifier"
+    },
+    "type": {
+      "type": "string",
+      "const": "agent"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 200
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "providers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "opencode": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "model": { "type": "string" },
+            "permissions": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "tools": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "claude-code": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "model": { "type": "string" },
+            "allowedTools": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "copilot": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "on": { "type": "string" },
+            "safe-outputs": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "permissions": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

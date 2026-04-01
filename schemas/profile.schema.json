@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asdm.dev/schemas/profile.schema.json",
+  "title": "ASDM Profile",
+  "description": "Schema for ASDM profile.yaml",
+  "type": "object",
+  "required": ["name"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "extends": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Parent profiles to inherit from"
+    },
+    "agents": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "skills": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "commands": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["opencode", "claude-code", "copilot"]
+      },
+      "uniqueItems": true
+    },
+    "provider_config": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "opencode": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "claude-code": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "copilot": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}

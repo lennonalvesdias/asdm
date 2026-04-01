@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+coverage/
+
+# ASDM local files (these should be gitignored in projects using ASDM)
+.asdm.local.json
+.asdm-overlay.json
+
+# ASDM cache
+.asdm-cache/
+
+# Generated manifest (committed only by CI)
+registry/manifest.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test artifacts
+.vitest/

@@ -1,0 +1,54 @@
+{
+  "name": "@asdm/cli",
+  "version": "0.1.0",
+  "description": "Agentic Software Delivery Model — CLI for unified AI coding assistant governance",
+  "type": "module",
+  "bin": {
+    "asdm": "dist/index.mjs"
+  },
+  "main": "dist/index.mjs",
+  "module": "dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist",
+    "registry",
+    "schemas"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:manifest": "tsx scripts/build-manifest.ts",
+    "validate:registry": "tsx scripts/validate.ts",
+    "prebuild": "npm run validate:registry",
+    "dev": "tsx src/cli/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "validate": "tsx scripts/validate.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["ai", "agents", "skills", "governance", "cli", "opencode", "claude", "copilot"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "citty": "^0.1.6",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "eslint": "^9.0.0",
+    "tsup": "^8.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

@@ -1,0 +1,34 @@
+name: fullstack-engineer
+description: "Perfil para desenvolvedores fullstack"
+extends:
+  - base
+
+agents:
+  - code-reviewer
+  - tdd-guide
+  - architect
+
+skills:
+  - react-best-practices
+  - api-design
+  - sql
+
+commands:
+  - review
+  - test
+  - deploy-preview
+
+providers:
+  - opencode
+  - claude-code
+  - copilot
+
+provider_config:
+  opencode:
+    theme: dark
+  claude-code:
+    permissions:
+      allow:
+        - "Read(**)"
+        - "Write(src/**)"
+        - "Bash(npm test)"

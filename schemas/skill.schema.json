@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asdm.dev/schemas/skill.schema.json",
+  "title": "ASDM Skill",
+  "description": "Schema for ASDM skill .asdm.md frontmatter",
+  "type": "object",
+  "required": ["name", "type", "description", "version"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "type": {
+      "type": "string",
+      "const": "skill"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 200
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "trigger": {
+      "type": "string",
+      "description": "Natural language trigger condition"
+    },
+    "providers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "opencode": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "location": { "type": "string" }
+          }
+        },
+        "claude-code": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "location": { "type": "string" }
+          }
+        },
+        "copilot": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "applyTo": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

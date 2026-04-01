@@ -1,0 +1,24 @@
+name: security
+description: "Security-focused development profile"
+extends:
+  - base
+
+agents:
+  - code-reviewer
+  - security-auditor
+  - documentation-writer
+
+skills:
+  - plan-protocol
+  - code-review
+  - threat-modeling
+
+commands:
+  - check-file
+  - summarize
+  - audit-deps
+
+providers:
+  - opencode
+  - claude-code
+  - copilot

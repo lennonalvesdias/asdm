@@ -1,0 +1,63 @@
+{
+  "$schema": "https://asdm.dev/schemas/manifest.schema.json",
+  "version": "1.0.0",
+  "built_at": "2026-03-31T12:00:00Z",
+  "commit_sha": "a1b2c3d4e5f6789",
+  "policy": {
+    "locked_fields": ["telemetry", "install_hooks", "auto_verify"],
+    "telemetry": true,
+    "auto_verify": true,
+    "install_hooks": true,
+    "allowed_profiles": ["base", "fullstack-engineer", "data-analytics", "mobile", "mobile-ios"],
+    "allowed_providers": ["opencode", "claude-code", "copilot"],
+    "min_cli_version": "0.1.0"
+  },
+  "profiles": {
+    "base": {
+      "extends": [],
+      "agents": ["code-reviewer", "security-scanner"],
+      "skills": [],
+      "commands": ["review"]
+    },
+    "fullstack-engineer": {
+      "extends": ["base"],
+      "agents": ["tdd-guide", "architect"],
+      "skills": ["react-best-practices", "api-design", "sql"],
+      "commands": ["test", "deploy-preview"],
+      "providers": ["opencode", "claude-code", "copilot"]
+    },
+    "data-analytics": {
+      "extends": ["base"],
+      "agents": ["data-pipeline", "sql-optimizer"],
+      "skills": ["pandas", "sql"],
+      "commands": ["query"],
+      "providers": ["opencode", "claude-code"]
+    },
+    "mobile": {
+      "extends": ["base"],
+      "agents": ["mobile-architect"],
+      "skills": ["react-native"],
+      "commands": [],
+      "providers": ["opencode", "claude-code"]
+    },
+    "mobile-ios": {
+      "extends": ["mobile"],
+      "agents": [],
+      "skills": ["swift-ui"],
+      "commands": [],
+      "providers": ["opencode", "claude-code"]
+    }
+  },
+  "assets": {
+    "agents/code-reviewer.asdm.md": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 2847,
+      "version": "1.3.0"
+    },
+    "agents/security-scanner.asdm.md": {
+      "sha256": "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592",
+      "size": 1920,
+      "version": "1.0.0"
+    }
+  }
+}
