@@ -62,7 +62,8 @@ export default defineCommand({
           logger.error(`${icon} ${v.filePath} (${v.type})`)
         }
       }
-      process.exit(result.exitCode)
+      process.exitCode = result.exitCode
+      return
     }
 
     try {
@@ -70,13 +71,15 @@ export default defineCommand({
 
       if (useJson) {
         console.log(JSON.stringify(result, null, 2))
-        process.exit(result.exitCode)
+        process.exitCode = result.exitCode
+        return
       }
 
       if (result.exitCode === VERIFY_EXIT_CODES.NO_LOCK) {
         logger.warn('No lockfile found (.asdm-lock.json)')
         logger.info('Run `asdm sync` to initialize')
-        process.exit(VERIFY_EXIT_CODES.NO_LOCK)
+        process.exitCode = VERIFY_EXIT_CODES.NO_LOCK
+        return
       }
 
       logger.asdm(`Verified ${result.checkedFiles} managed file(s)`)
@@ -104,11 +107,13 @@ export default defineCommand({
         logger.info('Run `asdm sync` to update')
       }
 
-      process.exit(result.exitCode)
+      process.exitCode = result.exitCode
+      return
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       logger.error(message)
-      process.exit(1)
+      process.exitCode = 1
+      return
     }
   },
 })

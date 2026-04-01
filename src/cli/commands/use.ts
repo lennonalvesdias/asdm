@@ -31,7 +31,8 @@ export default defineCommand({
 
     if (!profile) {
       logger.error('Profile name is required', 'Usage: asdm use <profile>')
-      process.exit(1)
+      process.exitCode = 1
+      return
     }
 
     try {
@@ -40,7 +41,8 @@ export default defineCommand({
     } catch (err) {
       if (err instanceof ConfigError) {
         logger.error('No .asdm.json found', 'Run `asdm init` first')
-        process.exit(1)
+        process.exitCode = 1
+        return
       }
       throw err
     }
@@ -54,7 +56,8 @@ export default defineCommand({
           `Profile "${profile}" not found in manifest`,
           `Available profiles: ${available}`
         )
-        process.exit(1)
+        process.exitCode = 1
+        return
       }
     } else {
       logger.warn('No cached manifest found — skipping profile validation')
@@ -73,7 +76,8 @@ export default defineCommand({
       const message = err instanceof Error ? err.message : String(err)
       const suggestion = (err as { suggestion?: string }).suggestion ?? undefined
       logger.error(message, suggestion)
-      process.exit(1)
+      process.exitCode = 1
+      return
     }
   },
 })

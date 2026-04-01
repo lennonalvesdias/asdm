@@ -88,7 +88,8 @@ export default defineCommand({
       const suggestion =
         (err as { suggestion?: string }).suggestion ?? undefined
       logger.error(message, suggestion)
-      process.exit(1)
+      process.exitCode = 1
+      return
     }
   },
 })

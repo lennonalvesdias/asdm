@@ -14,6 +14,7 @@ import type { AsdmManifest } from './manifest.js'
 
 const GITHUB_API_BASE = 'https://api.github.com'
 const GITHUB_RAW_BASE = 'https://github.com'
+const FETCH_TIMEOUT_MS = 10_000
 
 export interface RegistryClientOptions {
   token?: string        // GitHub token (GITHUB_TOKEN or ASDM_GITHUB_TOKEN)
@@ -51,8 +52,11 @@ async function fetchWithRetry(
       await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)))
     }
 
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+
     try {
-      const response = await fetch(url, options)
+      const response = await fetch(url, { ...options, signal: controller.signal })
 
       if (response.status === 403 || response.status === 429) {
         // Rate limited — retry
@@ -71,6 +75,8 @@ async function fetchWithRetry(
         `Network request failed after ${maxRetries} attempts: ${lastError.message}`,
         'Check your internet connection and GitHub token'
       )
+    } finally {
+      clearTimeout(timer)
     }
   }
 
@@ -193,7 +199,14 @@ export class RegistryClient {
   async ping(): Promise<boolean> {
     try {
       const url = `${GITHUB_API_BASE}/repos/${this.org}/${this.repo}`
-      const response = await fetch(url, { headers: this.headers })
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+      let response: Response
+      try {
+        response = await fetch(url, { headers: this.headers, signal: controller.signal })
+      } finally {
+        clearTimeout(timer)
+      }
       return response.status === 200
     } catch {
       return false

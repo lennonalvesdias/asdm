@@ -58,7 +58,7 @@ function printUpdateBox(currentVersion: string, latestVersion: string): void {
   const RESET = '\x1b[0m'
 
   const updateLine = `  Update available: ${currentVersion} \u2192 ${latestVersion}`
-  const cmdLine    = `  Run: npm install -g @asdm/cli`
+  const cmdLine    = `  Run: npm install -g asdm-cli`
 
   const MIN_WIDTH = 45
   const innerWidth = Math.max(
@@ -77,8 +77,9 @@ function printUpdateBox(currentVersion: string, latestVersion: string): void {
 async function main(): Promise<void> {
   await runMain(rootCommand)
 
-  // Non-blocking update check — runs after the command completes.
-  // Any failure is swallowed so it never disrupts normal CLI usage.
+  // Skip version check if command already set exit code (e.g. error)
+  if (process.exitCode !== undefined && process.exitCode !== 0) return
+
   try {
     const latestVersion = await checkForUpdate(__ASDM_VERSION__)
     if (latestVersion) {
@@ -89,4 +90,4 @@ async function main(): Promise<void> {
   }
 }
 
-main()
+main().catch(() => {})

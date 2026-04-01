@@ -69,12 +69,15 @@ export async function checkForUpdate(currentVersion: string): Promise<string | n
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
 
-    const response = await fetch('https://registry.npmjs.org/@asdm/cli/latest', {
-      signal: controller.signal,
-      headers: { Accept: 'application/json' },
-    })
-
-    clearTimeout(timer)
+    let response: Response
+    try {
+      response = await fetch('https://registry.npmjs.org/asdm-cli/latest', {
+        signal: controller.signal,
+        headers: { Accept: 'application/json' },
+      })
+    } finally {
+      clearTimeout(timer)
+    }
 
     if (!response.ok) return null
 

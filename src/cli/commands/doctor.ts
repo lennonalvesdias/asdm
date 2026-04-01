@@ -275,7 +275,8 @@ export default defineCommand({
 
     if (anyFailed) {
       logger.error('Some checks failed — review the output above')
-      process.exit(1)
+      process.exitCode = 1
+      return
     } else {
       logger.success('All checks passed')
     }

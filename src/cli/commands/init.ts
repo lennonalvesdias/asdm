@@ -54,7 +54,7 @@ export default defineCommand({
     const alreadyExists = await exists(configPath)
     if (alreadyExists && !ctx.args.force) {
       logger.warn('.asdm.json already exists. Use --force to overwrite.')
-      process.exit(0)
+      return
     }
 
     const profile = ctx.args.profile || 'base'
@@ -86,7 +86,8 @@ export default defineCommand({
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       logger.error(message)
-      process.exit(1)
+      process.exitCode = 1
+      return
     }
   },
 })

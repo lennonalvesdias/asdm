@@ -25,7 +25,8 @@ export default defineCommand({
     } catch (err) {
       if (err instanceof ConfigError) {
         logger.warn('Not initialized. Run `asdm init` first.')
-        process.exit(1)
+        process.exitCode = 1
+        return
       }
       throw err
     }
