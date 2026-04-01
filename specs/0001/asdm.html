@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASDM — Agent Skills Distribution Manager — Arquitetura</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e17;
+  --surface: #111827;
+  --surface-2: #1a2236;
+  --border: #1e2d4a;
+  --accent: #3b82f6;
+  --accent-2: #06b6d4;
+  --accent-glow: rgba(59, 130, 246, 0.15);
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --green: #10b981;
+  --orange: #f59e0b;
+  --red: #ef4444;
+  --purple: #a78bfa;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+.hero {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  position: relative;
+  background: radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.08) 0%, transparent 60%);
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    repeating-linear-gradient(90deg, rgba(59,130,246,0.03) 0, rgba(59,130,246,0.03) 1px, transparent 1px, transparent 80px),
+    repeating-linear-gradient(0deg, rgba(59,130,246,0.03) 0, rgba(59,130,246,0.03) 1px, transparent 1px, transparent 80px);
+  pointer-events: none;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.35rem 1rem;
+  background: var(--accent-glow);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #fff 30%, var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero .subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.hero p.desc {
+  max-width: 600px;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+}
+
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* Navigation */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 14, 23, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 0;
+  overflow-x: auto;
+}
+
+nav .container {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+nav .container::-webkit-scrollbar { display: none; }
+
+nav a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+nav a:hover, nav a.active {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+/* Sections */
+section {
+  padding: 4rem 0;
+  border-top: 1px solid var(--border);
+}
+
+section:first-of-type { border-top: none; }
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+h2 .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--accent);
+  background: var(--accent-glow);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid rgba(59,130,246,0.2);
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 2rem 0 0.75rem;
+  color: var(--accent-2);
+}
+
+p { margin-bottom: 1rem; color: var(--text-muted); }
+p.lead { font-size: 1.05rem; color: var(--text); }
+
+/* Code blocks */
+pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.8;
+  margin: 1rem 0 1.5rem;
+  color: var(--text);
+}
+
+code {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--surface);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+  color: var(--accent-2);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* Cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: border-color 0.3s, transform 0.2s;
+}
+
+.card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.card .icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.card h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.card p { font-size: 0.9rem; margin: 0; }
+
+/* Architecture diagram */
+.diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 2rem 0;
+  overflow-x: auto;
+}
+
+.diagram-row {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0.5rem 0;
+  flex-wrap: wrap;
+}
+
+.diagram-box {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  border: 1px solid;
+  min-width: 120px;
+}
+
+.diagram-box.dev { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: var(--accent); }
+.diagram-box.cli { background: rgba(6,182,212,0.1); border-color: rgba(6,182,212,0.3); color: var(--accent-2); }
+.diagram-box.registry { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: var(--green); }
+.diagram-box.provider { background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.3); color: var(--purple); }
+.diagram-box.security { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: var(--orange); }
+
+.diagram-arrow {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  margin: 0.25rem 0;
+}
+
+/* Tables */
+.table-wrap {
+  overflow-x: auto;
+  margin: 1rem 0;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+th {
+  background: var(--surface-2);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+td {
+  padding: 0.65rem 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+tr:hover td { background: rgba(59,130,246,0.03); }
+
+/* Flow list */
+.flow-list {
+  list-style: none;
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.flow-list::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+
+.flow-list li {
+  position: relative;
+  padding: 0.75rem 0 0.75rem 3rem;
+}
+
+.flow-list li::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 1.1rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+}
+
+.flow-list li strong {
+  color: var(--text);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.flow-list li span {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Tag pills */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.tag {
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.tag.blue { background: rgba(59,130,246,0.15); color: var(--accent); }
+.tag.green { background: rgba(16,185,129,0.15); color: var(--green); }
+.tag.purple { background: rgba(167,139,250,0.15); color: var(--purple); }
+.tag.orange { background: rgba(245,158,11,0.15); color: var(--orange); }
+
+/* Callout */
+.callout {
+  background: var(--surface);
+  border-left: 3px solid var(--accent);
+  padding: 1rem 1.25rem;
+  border-radius: 0 8px 8px 0;
+  margin: 1.5rem 0;
+}
+
+.callout.warn { border-left-color: var(--orange); }
+.callout.success { border-left-color: var(--green); }
+
+.callout strong { color: var(--text); }
+.callout p { margin: 0; font-size: 0.92rem; }
+
+footer {
+  padding: 3rem 0;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .card-grid { grid-template-columns: 1fr; }
+  .diagram { padding: 1rem; }
+  section { padding: 2.5rem 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="badge">RFC — Documento de Arquitetura</span>
+  <h1>ASDM</h1>
+  <p class="subtitle">Agent Skills Distribution Manager</p>
+  <p class="desc">Plataforma corporativa para gestão centralizada, distribuição segura e metrificação de agents, commands e skills — multi-provider por design.</p>
+</div>
+
+<nav>
+  <div class="container">
+    <a href="#problema">Problema</a>
+    <a href="#principios">Princípios</a>
+    <a href="#arquitetura">Arquitetura</a>
+    <a href="#registry">Registry</a>
+    <a href="#cli">CLI</a>
+    <a href="#providers">Providers</a>
+    <a href="#seguranca">Segurança</a>
+    <a href="#metricas">Métricas</a>
+    <a href="#perfis">Perfis</a>
+    <a href="#estrutura">Estrutura</a>
+    <a href="#fluxos">Fluxos</a>
+    <a href="#roadmap">Roadmap</a>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- 01 — PROBLEMA -->
+<section id="problema">
+  <h2><span class="num">01</span> Problema</h2>
+  <p class="lead">Hoje, cada provider de AI coding agent tem seu próprio formato de configuração. O resultado é fragmentação, duplicação e zero governança.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="icon">🔀</div>
+      <h4>Fragmentação de formatos</h4>
+      <p>OpenCode usa <code>.opencode/</code> com OCX, Claude Code usa <code>.claude/</code> com SKILL.md, Copilot usa <code>.github/agents/</code> com instructions.md. Cada dev mantém 3+ configurações.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔓</div>
+      <h4>Zero governança</h4>
+      <p>Qualquer dev pode alterar agents/skills localmente. Não há versionamento central, auditoria de mudanças ou garantia de integridade dos arquivos distribuídos.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📊</div>
+      <h4>Sem visibilidade</h4>
+      <p>Não sabemos quais perfis estão sendo usados, quais skills são mais efetivos, nem se os devs estão com versões atualizadas. Zero métricas de adoção.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 02 — PRINCÍPIOS -->
+<section id="principios">
+  <h2><span class="num">02</span> Princípios de Design</h2>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="icon">📝</div>
+      <h4>Write Once, Emit Many</h4>
+      <p>Um único source-of-truth (ASDM Registry) que emite configurações nativas para cada provider. O dev não precisa saber o formato de cada um.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔐</div>
+      <h4>Integrity by Default</h4>
+      <p>Cada arquivo distribuído carrega um SHA-256. A CLI valida na sincronização. Manipulação local é detectada e reportada.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🎯</div>
+      <h4>Profile-First</h4>
+      <p>Perfis (fullstack, data, mobile) são cidadãos de primeira classe. Cada perfil define seu conjunto de agents, skills e commands.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🧩</div>
+      <h4>Composable</h4>
+      <p>Perfis herdam de uma base e compõem layers. Um dev mobile pode extender o perfil base + mobile + iOS sem duplicação.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 03 — ARQUITETURA -->
+<section id="arquitetura">
+  <h2><span class="num">03</span> Visão da Arquitetura</h2>
+
+  <div class="diagram">
+    <div class="diagram-row">
+      <div class="diagram-box dev">Dev Machine A</div>
+      <div class="diagram-box dev">Dev Machine B</div>
+      <div class="diagram-box dev">Dev Machine N</div>
+    </div>
+    <div class="diagram-arrow">↕ <small>npx asdm sync</small></div>
+    <div class="diagram-row">
+      <div class="diagram-box cli">ASDM CLI</div>
+    </div>
+    <div class="diagram-arrow">↕ <small>HTTPS + SHA-256 verify</small></div>
+    <div class="diagram-row">
+      <div class="diagram-box registry">ASDM Registry API</div>
+    </div>
+    <div class="diagram-arrow">↕</div>
+    <div class="diagram-row">
+      <div class="diagram-box security">Git Repo (Source of Truth)</div>
+      <div class="diagram-box security">Metrics Store</div>
+    </div>
+    <div class="diagram-arrow">↓ <small>emit adapters</small></div>
+    <div class="diagram-row">
+      <div class="diagram-box provider">OpenCode / OCX</div>
+      <div class="diagram-box provider">Claude Code</div>
+      <div class="diagram-box provider">GitHub Copilot</div>
+    </div>
+  </div>
+
+  <h3>Componentes Principais</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Componente</th><th>Responsabilidade</th><th>Tech Stack</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>ASDM Registry</strong></td>
+          <td>API centralizada para servir manifests, profiles e assets versionados</td>
+          <td>Node.js / Cloudflare Workers</td>
+        </tr>
+        <tr>
+          <td><strong>ASDM CLI</strong></td>
+          <td>Sincronização local, validação de integridade, emissão multi-provider</td>
+          <td>TypeScript, distribuído via npm</td>
+        </tr>
+        <tr>
+          <td><strong>Source Repo</strong></td>
+          <td>Git repo monorepo com todos os profiles, agents, skills e commands</td>
+          <td>Git + CI/CD (GitHub Actions)</td>
+        </tr>
+        <tr>
+          <td><strong>Emit Adapters</strong></td>
+          <td>Transpiladores que convertem formato ASDM → formato nativo do provider</td>
+          <td>TypeScript plugins</td>
+        </tr>
+        <tr>
+          <td><strong>Integrity Service</strong></td>
+          <td>Geração de checksums, detecção de tampering, alertas</td>
+          <td>SHA-256 + manifest locks</td>
+        </tr>
+        <tr>
+          <td><strong>Metrics Collector</strong></td>
+          <td>Telemetria de syncs, versões ativas, drift de integridade</td>
+          <td>Lightweight beacon → data store</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 04 — REGISTRY -->
+<section id="registry">
+  <h2><span class="num">04</span> ASDM Registry</h2>
+  <p>O Registry é o coração da plataforma. Ele é um serviço HTTP que serve o manifest de versões e os assets (arquivos de agents, skills, commands) assinados com checksums.</p>
+
+  <h3>Manifest Schema</h3>
+  <pre><code>{
+  "version": "2.1.0",
+  "published_at": "2026-03-31T12:00:00Z",
+  "profiles": {
+    "fullstack-engineer": {
+      "extends": ["base"],
+      "description": "Perfil para devs fullstack",
+      "agents": ["code-reviewer", "tdd-guide", "architect"],
+      "skills": ["docx", "pdf", "react-best-practices", "api-design"],
+      "commands": ["review", "test", "deploy-preview"],
+      "providers": ["opencode", "claude-code", "copilot"]
+    },
+    "data-analytics": {
+      "extends": ["base"],
+      "agents": ["data-pipeline", "sql-optimizer", "viz-builder"],
+      "skills": ["pandas", "sql", "dbt", "jupyter"],
+      "commands": ["query", "pipeline", "notebook"],
+      "providers": ["opencode", "claude-code", "copilot"]
+    },
+    "mobile": {
+      "extends": ["base"],
+      "agents": ["mobile-architect", "ui-reviewer"],
+      "skills": ["react-native", "swift-ui", "kotlin-compose"],
+      "commands": ["build-ios", "build-android", "e2e"],
+      "providers": ["opencode", "claude-code", "copilot"]
+    }
+  },
+  "assets": {
+    "agents/code-reviewer.md": {
+      "sha256": "a1b2c3d4...",
+      "size": 4521,
+      "updated_at": "2026-03-30T10:00:00Z"
+    }
+  }
+}</code></pre>
+
+  <h3>API Endpoints</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Endpoint</th><th>Método</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>/v1/manifest</code></td><td>GET</td><td>Retorna manifest completo com checksums</td></tr>
+        <tr><td><code>/v1/profiles/:name</code></td><td>GET</td><td>Retorna definição de um perfil específico</td></tr>
+        <tr><td><code>/v1/assets/:path</code></td><td>GET</td><td>Download do arquivo com header X-SHA256</td></tr>
+        <tr><td><code>/v1/sync</code></td><td>POST</td><td>Recebe checksums locais, retorna diff de arquivos</td></tr>
+        <tr><td><code>/v1/telemetry</code></td><td>POST</td><td>Recebe beacon de métricas da CLI</td></tr>
+        <tr><td><code>/v1/verify</code></td><td>POST</td><td>Valida integridade de um conjunto de arquivos</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>Hosting flexível:</strong> O Registry pode rodar como Cloudflare Worker (zero-infra), como container Docker interno, ou até servido diretamente de um bucket S3 com um CDN na frente — desde que os checksums estejam no manifest.</p>
+  </div>
+</section>
+
+<!-- 05 — CLI -->
+<section id="cli">
+  <h2><span class="num">05</span> ASDM CLI</h2>
+  <p>A CLI é o ponto de contato do desenvolvedor. Deve ser extremamente simples — idealmente um único comando resolve 90% dos casos.</p>
+
+  <h3>Comandos Principais</h3>
+  <pre><code># Sincroniza tudo para o perfil do dev
+npx asdm sync
+
+# Sincroniza perfil específico
+npx asdm sync --profile fullstack-engineer
+
+# Verifica integridade dos arquivos locais
+npx asdm verify
+
+# Lista perfis disponíveis
+npx asdm profiles
+
+# Mostra diff entre local e registry
+npx asdm status
+
+# Inicializa projeto com perfil
+npx asdm init --profile data-analytics
+
+# Força re-download de tudo
+npx asdm sync --force
+
+# Sync apenas para um provider específico
+npx asdm sync --provider opencode</code></pre>
+
+  <h3>Configuração Local</h3>
+  <p>Arquivo <code>.asdm.json</code> na raiz do projeto ou <code>~/.config/asdm/config.json</code> para global:</p>
+  <pre><code>{
+  "registry": "https://asdm.internal.company.com",
+  "profile": "fullstack-engineer",
+  "providers": ["opencode", "claude-code", "copilot"],
+  "auto_verify": true,
+  "telemetry": true,
+  "sync_on_git_pull": true,
+  "lockfile": ".asdm-lock.json"
+}</code></pre>
+
+  <h3>Lockfile (<code>.asdm-lock.json</code>)</h3>
+  <p>Gerado automaticamente após cada sync. Garante reprodutibilidade e permite detectar drift.</p>
+  <pre><code>{
+  "synced_at": "2026-03-31T14:22:00Z",
+  "manifest_version": "2.1.0",
+  "profile": "fullstack-engineer",
+  "files": {
+    ".opencode/agents/code-reviewer.md": {
+      "sha256": "a1b2c3d4...",
+      "source": "agents/code-reviewer.md"
+    },
+    ".claude/agents/code-reviewer.md": {
+      "sha256": "e5f6a7b8...",
+      "source": "agents/code-reviewer.md",
+      "adapter": "claude-code"
+    },
+    ".github/agents/code-reviewer.agent.md": {
+      "sha256": "c9d0e1f2...",
+      "source": "agents/code-reviewer.md",
+      "adapter": "copilot"
+    }
+  }
+}</code></pre>
+</section>
+
+<!-- 06 — PROVIDERS -->
+<section id="providers">
+  <h2><span class="num">06</span> Emit Adapters (Multi-Provider)</h2>
+  <p>Cada provider tem seu formato nativo. O ASDM mantém uma camada de adaptadores que converte o formato canônico para o formato esperado por cada ferramenta.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Provider</th><th>Agents</th><th>Skills</th><th>Instructions</th><th>Config</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>OpenCode (OCX)</strong></td>
+          <td><code>.opencode/agents/*.md</code></td>
+          <td><code>.opencode/skills/*/SKILL.md</code></td>
+          <td><code>AGENTS.md</code></td>
+          <td><code>.opencode/opencode.jsonc</code></td>
+        </tr>
+        <tr>
+          <td><strong>Claude Code</strong></td>
+          <td><code>.claude/agents/*.md</code></td>
+          <td><code>.claude/skills/*/SKILL.md</code></td>
+          <td><code>CLAUDE.md</code></td>
+          <td><code>.claude/settings.json</code></td>
+        </tr>
+        <tr>
+          <td><strong>GitHub Copilot</strong></td>
+          <td><code>.github/agents/*.agent.md</code></td>
+          <td>Via instructions</td>
+          <td><code>.github/copilot-instructions.md</code></td>
+          <td>YAML frontmatter</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Formato Canônico ASDM</h3>
+  <p>O source-of-truth é um formato intermediário que os adapters consomem:</p>
+  <pre><code># Arquivo canônico: agents/code-reviewer.asdm.md
+---
+name: code-reviewer
+description: "Revisa PRs com foco em segurança, performance e clean code"
+type: agent
+providers:
+  opencode:
+    model: anthropic/claude-sonnet-4
+    permissions: ["read", "write"]
+  claude-code:
+    model: claude-sonnet-4-20250514
+  copilot:
+    on: pull_request
+    safe-outputs: ["*.md", "review-*"]
+---
+
+# Code Reviewer Agent
+
+Você é um code reviewer sênior. Sua função é...
+
+## Regras
+- Sempre verifique vulnerabilidades OWASP Top 10
+- Sugira testes para lógica complexa
+- Nunca aprove código sem tratamento de erro adequado
+...</code></pre>
+
+  <h3>Adapter Pipeline</h3>
+  <ul class="flow-list">
+    <li>
+      <strong>1. Parse</strong>
+      <span>Lê o arquivo .asdm.md, separa frontmatter YAML do corpo Markdown</span>
+    </li>
+    <li>
+      <strong>2. Transform</strong>
+      <span>Aplica regras específicas do provider (ex: adicionar frontmatter <code>on:</code> para Copilot, gerar <code>opencode.jsonc</code> entries para OCX)</span>
+    </li>
+    <li>
+      <strong>3. Emit</strong>
+      <span>Grava o arquivo no path esperado pelo provider, com formatação nativa</span>
+    </li>
+    <li>
+      <strong>4. Checksum</strong>
+      <span>Calcula SHA-256 do arquivo emitido e registra no lockfile</span>
+    </li>
+  </ul>
+</section>
+
+<!-- 07 — SEGURANÇA -->
+<section id="seguranca">
+  <h2><span class="num">07</span> Segurança e Integridade</h2>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="icon">🔒</div>
+      <h4>SHA-256 em Tudo</h4>
+      <p>Cada arquivo no manifest possui hash SHA-256. Na sincronização, a CLI compara hashes antes de aceitar qualquer arquivo.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🚨</div>
+      <h4>Detecção de Tampering</h4>
+      <p><code>asdm verify</code> compara hashes locais contra o lockfile. Qualquer divergência gera alerta e pode bloquear execução.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🪝</div>
+      <h4>Git Hooks</h4>
+      <p>Hook de pre-commit que roda <code>asdm verify</code>. Se houver tampering, o commit é bloqueado até o dev fazer <code>asdm sync --force</code>.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📡</div>
+      <h4>Drift Reporting</h4>
+      <p>A telemetria reporta quando um dev está com arquivos modificados localmente. Dashboard mostra compliance por equipe.</p>
+    </div>
+  </div>
+
+  <h3>Fluxo de Verificação</h3>
+  <pre><code># Em .husky/pre-commit ou .git/hooks/pre-commit
+npx asdm verify --strict
+
+# Exit codes:
+#   0 = tudo íntegro
+#   1 = arquivos modificados (lista quais)
+#   2 = lockfile ausente (precisa sync)
+#   3 = versão desatualizada (nova versão no registry)</code></pre>
+
+  <h3>Modelo de Permissões (Registry)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Role</th><th>Pode</th><th>Não Pode</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Platform Admin</strong></td>
+          <td>Publicar versões, criar perfis, ver todas as métricas</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><strong>Tech Lead</strong></td>
+          <td>Propor mudanças (PR), ver métricas do time</td>
+          <td>Publicar direto sem aprovação</td>
+        </tr>
+        <tr>
+          <td><strong>Developer</strong></td>
+          <td>Sincronizar, verificar, ver métricas próprias</td>
+          <td>Alterar registry ou perfis</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <p><strong>Importante:</strong> O modelo copy-and-own do OCX é ótimo para flexibilidade individual, mas conflita com governança. O ASDM assume um modelo de <em>managed distribution</em>: arquivos emitidos são tratados como artefatos gerenciados. Se o dev precisa customizar, ele cria um overlay local que é separado do managed set.</p>
+  </div>
+</section>
+
+<!-- 08 — MÉTRICAS -->
+<section id="metricas">
+  <h2><span class="num">08</span> Metrificação</h2>
+  <p>A CLI envia beacons leves (opt-in corporativo) para o Metrics Collector. Isso permite visibilidade total de adoção sem invadir a privacidade do desenvolvedor.</p>
+
+  <h3>Dados Coletados</h3>
+  <div class="tags">
+    <span class="tag blue">profile_active</span>
+    <span class="tag blue">manifest_version</span>
+    <span class="tag green">sync_timestamp</span>
+    <span class="tag green">sync_duration_ms</span>
+    <span class="tag purple">providers_active</span>
+    <span class="tag purple">files_synced_count</span>
+    <span class="tag orange">integrity_violations</span>
+    <span class="tag orange">drift_detected</span>
+  </div>
+
+  <h3>Schema do Beacon</h3>
+  <pre><code>{
+  "event": "sync_complete",
+  "timestamp": "2026-03-31T14:22:00Z",
+  "machine_id": "sha256(hostname+user)[0:12]",
+  "profile": "fullstack-engineer",
+  "manifest_version": "2.1.0",
+  "providers": ["opencode", "claude-code"],
+  "files_synced": 24,
+  "integrity_ok": true,
+  "drift_files": [],
+  "sync_duration_ms": 1230
+}</code></pre>
+
+  <h3>Dashboards Sugeridos</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="icon">📈</div>
+      <h4>Adoção</h4>
+      <p>% de devs sincronizados na última versão, breakdown por perfil e por time.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🛡️</div>
+      <h4>Compliance</h4>
+      <p>Devs com drift, violações de integridade, tempo médio para re-sync após nova versão.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔧</div>
+      <h4>Provider Mix</h4>
+      <p>Distribuição de providers em uso (OpenCode vs Claude Code vs Copilot), tendências ao longo do tempo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 09 — PERFIS -->
+<section id="perfis">
+  <h2><span class="num">09</span> Sistema de Perfis</h2>
+  <p>Perfis são a unidade principal de organização. Eles usam herança e composição para evitar duplicação.</p>
+
+  <h3>Modelo de Herança</h3>
+  <pre><code>┌─────────────────────────────┐
+│           base              │  ← Agents e skills comuns a todos
+│  - code-reviewer            │
+│  - security-scanner         │
+│  - conventional-commits     │
+├──────────┬──────────┬───────┤
+│ fullstack│  data    │mobile │  ← Extends base
+│ + api    │ + pandas │ + rn  │
+│ + react  │ + sql    │ + ios │
+│ + infra  │ + dbt    │ + and │
+└──────────┴──────────┴───────┘
+                │
+         ┌──────┴──────┐
+         │ mobile-ios  │  ← Extends mobile
+         │ + swift-ui  │
+         │ + xcode     │
+         └─────────────┘</code></pre>
+
+  <h3>Resolução de Perfil</h3>
+  <p>A resolução segue deep merge com precedência do mais específico:</p>
+  <pre><code>final_config = deep_merge(
+  profiles["base"],
+  profiles["mobile"],
+  profiles["mobile-ios"],     // mais específico ganha
+  local_overlay               // overlay do dev (se existir)
+)</code></pre>
+
+  <div class="callout success">
+    <p><strong>Overlay Local:</strong> Devs podem ter um <code>.asdm-overlay.json</code> para adicionar skills pessoais que não fazem parte do perfil corporativo. Esses overlays são <em>aditivos</em> — não podem remover ou substituir managed assets.</p>
+  </div>
+</section>
+
+<!-- 10 — ESTRUTURA -->
+<section id="estrutura">
+  <h2><span class="num">10</span> Estrutura do Source Repo</h2>
+  <pre><code>asdm-registry/
+├── profiles/
+│   ├── base/
+│   │   └── profile.yaml
+│   ├── fullstack-engineer/
+│   │   └── profile.yaml
+│   ├── data-analytics/
+│   │   └── profile.yaml
+│   └── mobile/
+│       └── profile.yaml
+├── agents/
+│   ├── code-reviewer.asdm.md
+│   ├── tdd-guide.asdm.md
+│   ├── architect.asdm.md
+│   ├── data-pipeline.asdm.md
+│   └── mobile-architect.asdm.md
+├── skills/
+│   ├── react-best-practices/
+│   │   ├── SKILL.asdm.md
+│   │   └── examples/
+│   ├── api-design/
+│   │   └── SKILL.asdm.md
+│   ├── pandas/
+│   │   └── SKILL.asdm.md
+│   └── react-native/
+│       └── SKILL.asdm.md
+├── commands/
+│   ├── review.asdm.md
+│   ├── test.asdm.md
+│   └── deploy-preview.asdm.md
+├── adapters/
+│   ├── opencode.ts       # Emit adapter para OpenCode/OCX
+│   ├── claude-code.ts    # Emit adapter para Claude Code
+│   └── copilot.ts        # Emit adapter para GitHub Copilot
+├── scripts/
+│   ├── build-manifest.ts # Gera manifest.json com checksums
+│   ├── validate.ts       # Valida schemas dos .asdm.md
+│   └── publish.ts        # Publica no registry
+├── .github/
+│   └── workflows/
+│       ├── validate.yml  # PR validation
+│       └── publish.yml   # Release → build manifest → deploy registry
+├── manifest.json         # Gerado automaticamente
+└── asdm.config.ts        # Config do build pipeline</code></pre>
+</section>
+
+<!-- 11 — FLUXOS -->
+<section id="fluxos">
+  <h2><span class="num">11</span> Fluxos Operacionais</h2>
+
+  <h3>A. Dev Sincroniza (dia a dia)</h3>
+  <ul class="flow-list">
+    <li><strong>npx asdm sync</strong><span>Dev roda o comando no terminal</span></li>
+    <li><strong>CLI lê .asdm.json</strong><span>Identifica profile, registry URL, providers ativos</span></li>
+    <li><strong>POST /v1/sync</strong><span>Envia checksums locais ao registry</span></li>
+    <li><strong>Registry calcula diff</strong><span>Retorna apenas arquivos novos ou modificados</span></li>
+    <li><strong>Download + verify</strong><span>Baixa assets, verifica SHA-256 de cada um</span></li>
+    <li><strong>Emit adapters rodam</strong><span>Converte para formato nativo de cada provider</span></li>
+    <li><strong>Lockfile atualizado</strong><span>.asdm-lock.json gravado com novos hashes</span></li>
+    <li><strong>Beacon de telemetria</strong><span>Envia métricas de sync ao collector</span></li>
+  </ul>
+
+  <h3>B. Platform Team Publica Nova Versão</h3>
+  <ul class="flow-list">
+    <li><strong>PR no source repo</strong><span>Tech lead abre PR com mudanças em agents/skills</span></li>
+    <li><strong>CI: validate.yml</strong><span>Valida schemas, checa frontmatter, roda linting</span></li>
+    <li><strong>Code review + merge</strong><span>Aprovação por pelo menos 2 platform admins</span></li>
+    <li><strong>CI: publish.yml</strong><span>Build manifest (com checksums), deploy ao registry</span></li>
+    <li><strong>Devs detectam no próximo sync</strong><span>CLI avisa que há nova versão disponível</span></li>
+  </ul>
+
+  <h3>C. Detecção de Tampering</h3>
+  <ul class="flow-list">
+    <li><strong>Dev edita arquivo managed</strong><span>Ex: altera .opencode/agents/code-reviewer.md manualmente</span></li>
+    <li><strong>Pre-commit hook: asdm verify</strong><span>Detecta SHA-256 divergente</span></li>
+    <li><strong>Commit bloqueado</strong><span>Mensagem clara: "arquivo X foi modificado fora do ASDM"</span></li>
+    <li><strong>Dev escolhe</strong><span><code>asdm sync --force</code> para restaurar, ou move customização para overlay</span></li>
+    <li><strong>Beacon reporta violation</strong><span>Dashboard de compliance atualizado</span></li>
+  </ul>
+</section>
+
+<!-- 12 — ROADMAP -->
+<section id="roadmap">
+  <h2><span class="num">12</span> Roadmap de Implementação</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Fase</th><th>Escopo</th><th>Duração Est.</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag green">Fase 1 — Foundation</span></td>
+          <td>Source repo + manifest build + CLI básica (sync, verify) + adapter OpenCode</td>
+          <td>3–4 semanas</td>
+        </tr>
+        <tr>
+          <td><span class="tag blue">Fase 2 — Multi-Provider</span></td>
+          <td>Adapters Claude Code + Copilot, formato canônico .asdm.md, profiles com herança</td>
+          <td>2–3 semanas</td>
+        </tr>
+        <tr>
+          <td><span class="tag purple">Fase 3 — Integrity</span></td>
+          <td>Git hooks, verify --strict, lockfile, detecção de tampering, overlay system</td>
+          <td>2 semanas</td>
+        </tr>
+        <tr>
+          <td><span class="tag orange">Fase 4 — Metrics</span></td>
+          <td>Telemetry beacons, metrics store, dashboards de adoção e compliance</td>
+          <td>2–3 semanas</td>
+        </tr>
+        <tr>
+          <td><span class="tag blue">Fase 5 — Polish</span></td>
+          <td>Auto-sync on git pull, notificações de nova versão, documentação, onboarding</td>
+          <td>2 semanas</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout success">
+    <p><strong>Dica de quick start:</strong> A Fase 1 já entrega valor. Mesmo sem multi-provider, ter um <code>npx asdm sync</code> que distribui profiles versionados para OpenCode com verificação de integridade já resolve os maiores problemas de governança.</p>
+  </div>
+
+  <h3>Integrações Futuras</h3>
+  <div class="tags">
+    <span class="tag blue">Cursor</span>
+    <span class="tag blue">Windsurf</span>
+    <span class="tag blue">Aider</span>
+    <span class="tag green">Slack notifications</span>
+    <span class="tag purple">LDAP/SSO auth</span>
+    <span class="tag orange">Policy-as-Code</span>
+    <span class="tag green">Terraform provider</span>
+    <span class="tag purple">VS Code extension</span>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="container">
+    <p>ASDM — Agent Skills Distribution Manager — Documento de Arquitetura v1.0</p>
+    <p>Gerado em 31 de Março de 2026</p>
+  </div>
+</footer>
+
+<script>
+// Highlight active nav on scroll
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav a');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
