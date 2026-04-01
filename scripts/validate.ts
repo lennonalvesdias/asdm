@@ -52,8 +52,6 @@ interface ManifestPolicy {
 
 interface Manifest {
   version: string
-  built_at: string
-  commit_sha: string
   policy: ManifestPolicy
   profiles: Record<string, ManifestProfile>
   assets: Record<string, AssetEntry>
@@ -227,8 +225,6 @@ function validateManifestStructure(manifest: unknown): manifest is Manifest {
   const m = manifest as Record<string, unknown>
   return (
     typeof m['version'] === 'string' &&
-    typeof m['built_at'] === 'string' &&
-    typeof m['commit_sha'] === 'string' &&
     typeof m['policy'] === 'object' &&
     m['policy'] !== null &&
     typeof m['profiles'] === 'object' &&
