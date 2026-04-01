@@ -1,4 +1,4 @@
-# ASDM — Agent Skills Distribution Manager
+# ASDM — Agentic Software Delivery Model
 
 ## Especificação Técnica e Plano de Desenvolvimento
 
@@ -10,9 +10,9 @@
 
 ## Sumário Executivo
 
-O ASDM é uma plataforma corporativa para gestão centralizada, distribuição segura e metrificação de agents, commands e skills para AI coding assistants. Opera sob o princípio **Write Once, Emit Many**: um único source-of-truth que emite configurações nativas para OpenCode (via OCX), Claude Code e GitHub Copilot.
+O ASDM é um modelo corporativo para organização unificada, distribuição segura e metrificação de agents, commands e skills para AI coding assistants. Opera sob o princípio **Write Once, Emit Many**: um único source-of-truth que emite configurações nativas para qualquer provider — incluindo OpenCode (com e sem OCX), Claude Code, GitHub Copilot — e extensível para outros como Cursor, Windsurf e Aider.
 
-O problema que resolve é a fragmentação atual onde cada provider exige formatos distintos, não existe governança sobre o que os devs recebem, e não há visibilidade sobre adoção ou integridade dos arquivos distribuídos.
+O problema que resolve é a fragmentação atual onde cada provider exige formatos distintos, não existe governança sobre o que os devs recebem, e não há visibilidade sobre adoção ou integridade dos arquivos distribuídos. O ASDM define um modelo padronizado de organização que permite às empresas manter uma única fonte de verdade e exportá-la para qualquer provider presente ou futuro.
 
 ---
 
@@ -20,11 +20,11 @@ O problema que resolve é a fragmentação atual onde cada provider exige format
 
 ### 1.1 Estado Atual
 
-A empresa utiliza OpenCode como ferramenta principal de AI-assisted coding, com OCX (`kdcokenny/ocx`) para gestão de perfis. Existem três perfis ativos: `fullstack-engineer`, `data-analytics` e `mobile`. Adicionalmente, foi avaliado o `numman-ali/openskills` como solução de gestão de skills universal.
+A empresa utiliza múltiplos AI coding assistants — OpenCode (com e sem OCX), Claude Code e GitHub Copilot — dependendo do contexto e preferência de cada desenvolvedor. Com OCX (`kdcokenny/ocx`) é possível gerenciar perfis para OpenCode. Existem três perfis ativos: `fullstack-engineer`, `data-analytics` e `mobile`, e os desenvolvedores precisam poder trocar de perfil conforme a demanda (ex: um dev mobile alocado em tarefa fullstack). Adicionalmente, foi avaliado o `numman-ali/openskills` como solução de gestão de skills universal.
 
 ### 1.2 Problemas Identificados
 
-**Fragmentação de formatos** — OpenCode usa `.opencode/` com agents, skills e `opencode.jsonc`. Claude Code usa `.claude/` com `CLAUDE.md` e skills em `.claude/skills/`. GitHub Copilot usa `.github/copilot-instructions.md`, `.github/agents/*.agent.md` e `AGENTS.md`. Manter três configurações é insustentável.
+**Fragmentação de formatos** — OpenCode usa `.opencode/` com agents, skills e `opencode.jsonc`. Claude Code usa `.claude/` com `CLAUDE.md` e skills em `.claude/skills/`. GitHub Copilot usa `.github/copilot-instructions.md`, `.github/agents/*.agent.md` e `AGENTS.md`. Cada provider tem seu próprio formato e manter múltiplas configurações é insustentável.
 
 **Ausência de governança** — Qualquer desenvolvedor pode alterar arquivos de agents e skills localmente. Não há versionamento central, audit trail de mudanças, nem aprovação para modificações em instruções que afetam a qualidade do código gerado.
 
@@ -42,7 +42,7 @@ A empresa utiliza OpenCode como ferramenta principal de AI-assisted coding, com 
 
 ### 1.4 Decisão Arquitetural
 
-Nenhuma ferramenta existente resolve o problema completo. O ASDM será construído como uma camada acima, consumindo conceitos do OCX (SHA-256, profiles, registries) e do OpenSkills (universalidade via AGENTS.md/SKILL.md), mas adicionando governança corporativa, emissão multi-provider e telemetria.
+Nenhuma ferramenta existente resolve o problema completo. O ASDM será construído como um modelo e toolchain acima, consumindo conceitos do OCX (SHA-256, profiles, registries) e do OpenSkills (universalidade via AGENTS.md/SKILL.md), mas adicionando: organização unificada com formato canônico, governança corporativa, emissão multi-provider (OpenCode com/sem OCX, Claude Code, GitHub Copilot e extensível a outros), sistema de perfis com herança e troca dinâmica, e telemetria.
 
 ---
 
@@ -53,7 +53,7 @@ Nenhuma ferramenta existente resolve o problema completo. O ASDM será construí
 | ID | Requisito | Prioridade |
 |---|---|---|
 | RF-01 | Sincronizar agents, skills e commands de um registry central para a máquina do dev | Must |
-| RF-02 | Emitir arquivos no formato nativo de OpenCode, Claude Code e GitHub Copilot | Must |
+| RF-02 | Emitir arquivos no formato nativo de OpenCode (com e sem OCX), Claude Code, GitHub Copilot e extensível a outros providers | Must |
 | RF-03 | Suportar perfis com herança (base → especialização) | Must |
 | RF-04 | Verificar integridade de arquivos locais via SHA-256 | Must |
 | RF-05 | Detectar e reportar modificações não autorizadas (tampering) | Must |
@@ -64,6 +64,7 @@ Nenhuma ferramenta existente resolve o problema completo. O ASDM será construí
 | RF-10 | Notificar devs quando nova versão está disponível | Could |
 | RF-11 | Auto-sync ao executar git pull | Could |
 | RF-12 | Suportar providers adicionais (Cursor, Windsurf, Aider) via plugin | Could |
+| RF-13 | Permitir troca dinâmica de perfil pelo dev conforme demanda (ex: mobile → fullstack) | Must |
 
 ### 2.2 Requisitos Não-Funcionais
 
@@ -106,29 +107,40 @@ Nenhuma ferramenta existente resolve o problema completo. O ASDM será construí
 │  │ - cache │ │ - hooks  │ │ - copilot │ │ - events      │   │
 │  └─────────┘ └──────────┘ └───────────┘ └───────────────┘   │
 └──────────────────────┬───────────────────────────────────────┘
-                       │ HTTPS
+                       │ HTTPS (GitHub API)
                        ▼
 ┌──────────────────────────────────────────────────────────────┐
-│                  ASDM REGISTRY API                           │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │ Manifest    │  │ Asset       │  │ Telemetry           │  │
-│  │ Service     │  │ Service     │  │ Collector           │  │
-│  └──────┬──────┘  └──────┬──────┘  └──────────┬──────────┘  │
-│         │                │                     │             │
-│         ▼                ▼                     ▼             │
-│  ┌─────────────────────────────┐  ┌─────────────────────┐   │
-│  │ Git Repo (Source of Truth)  │  │ Metrics Store       │   │
-│  │ - profiles/                 │  │ (Postgres / SQLite  │   │
-│  │ - agents/                   │  │  / Analytics SaaS)  │   │
-│  │ - skills/                   │  │                     │   │
-│  │ - commands/                 │  └─────────────────────┘   │
-│  └─────────────────────────────┘                             │
+│              GIT-BASED REGISTRY (GitHub Releases)            │
+│                                                              │
+│  CI (merge to main)                                          │
+│    → build-manifest.ts gera manifest.json + SHA-256          │
+│    → gh release create vX.Y.Z com manifest + assets          │
+│                                                              │
+│  CLI (asdm sync)                                             │
+│    → GET /releases/latest → manifest.json                    │
+│    → GET /releases/download/vX.Y.Z/agents/...                │
+│    → verify SHA-256 → emit adapters                          │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ Source Repo (Git — Single Source of Truth)              │ │
+│  │ - profiles/ agents/ skills/ commands/ schemas/          │ │
+│  │ - policy.yaml (corporate policy)                        │ │
+│  └─────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────┘
+                       │
+                       ▼ (Fase 4+, opcional)
+┌──────────────────────────────────────────────────────────────┐
+│              TELEMETRY API (adicionada depois)                │
+│  ┌─────────────────────┐  ┌─────────────────────┐            │
+│  │ POST /v1/telemetry  │  │ Metrics Store       │            │
+│  │ (CF Worker / Hono)  │  │ (D1 / Supabase)     │            │
+│  └─────────────────────┘  └─────────────────────┘            │
 └──────────────────────────────────────────────────────────────┘
 ```
 
 ### 3.2 Source Repo (Monorepo)
 
-O source repo é o single source-of-truth. Toda mudança passa por PR com review obrigatório. O CI gera o manifest com checksums e faz deploy ao registry.
+O source repo é o single source-of-truth. Toda mudança passa por PR com review obrigatório. O CI gera o manifest com checksums e publica como GitHub Release.
 
 ```
 asdm-registry/
@@ -176,7 +188,8 @@ asdm-registry/
 │
 ├── adapters/
 │   ├── base.ts                    # Interface e helpers comuns
-│   ├── opencode.ts                # Emit adapter para OpenCode/OCX
+│   ├── opencode.ts                # Emit adapter para OpenCode (com OCX)
+│   ├── opencode-standalone.ts     # Emit adapter para OpenCode (sem OCX)
 │   ├── claude-code.ts             # Emit adapter para Claude Code
 │   └── copilot.ts                 # Emit adapter para GitHub Copilot
 │
@@ -188,15 +201,16 @@ asdm-registry/
 │   └── manifest.schema.json       # JSON Schema para manifest.json gerado
 │
 ├── scripts/
-│   ├── build-manifest.ts          # Gera manifest.json com checksums
+│   ├── build-manifest.ts          # Gera manifest.json com checksums + policy
 │   ├── validate.ts                # Valida todos os schemas
-│   └── publish.ts                 # Publica no registry endpoint
+│   └── publish.ts                 # Cria GitHub Release com manifest + assets
 │
 ├── .github/
 │   └── workflows/
 │       ├── validate.yml           # Roda em PRs: lint, schema validation, dry-run build
-│       └── publish.yml            # Roda em merge to main: build manifest, deploy registry
+│       └── publish.yml            # Roda em merge to main: build manifest, create release
 │
+├── policy.yaml                    # Corporate policy (locked fields, allowed profiles/providers)
 ├── manifest.json                  # Gerado automaticamente pelo CI (não editar)
 ├── asdm.config.ts                 # Configuração do build pipeline
 ├── package.json
@@ -225,6 +239,8 @@ providers:
     tools:
       - bash
       - glob
+    # Quando OCX está disponível, gera estrutura compatível
+    # Quando não, gera config direta em .opencode/
 
   claude-code:
     model: claude-sonnet-4-20250514
@@ -371,7 +387,7 @@ commands:
   - deploy-preview
 
 providers:
-  - opencode
+  - opencode       # Funciona com e sem OCX
   - claude-code
   - copilot
 
@@ -394,12 +410,24 @@ provider_config:
 
 ### 3.7 Manifest (Gerado pelo CI)
 
+O manifest é gerado automaticamente pelo CI e publicado como asset da GitHub Release. Contém metadados de todos os assets, checksums SHA-256, e a **policy corporativa** que define regras que a CLI deve respeitar.
+
 ```json
 {
   "$schema": "./schemas/manifest.schema.json",
   "version": "2.1.0",
   "built_at": "2026-03-31T12:00:00Z",
   "commit_sha": "a1b2c3d4e5f6",
+
+  "policy": {
+    "locked_fields": ["registry", "telemetry", "install_hooks"],
+    "telemetry": true,
+    "auto_verify": true,
+    "install_hooks": true,
+    "allowed_profiles": ["base", "fullstack-engineer", "data-analytics", "mobile", "mobile-ios"],
+    "allowed_providers": ["opencode", "claude-code", "copilot"],
+    "min_cli_version": "1.0.0"
+  },
 
   "profiles": {
     "base": {
@@ -432,59 +460,51 @@ provider_config:
 }
 ```
 
-### 3.8 Registry API
+### 3.8 Git-Based Registry
 
-O Registry é um serviço HTTP stateless que serve o manifest e os assets. Pode ser implementado como Cloudflare Worker, container Docker ou server Node.js convencional.
+O registry na v1 é **Git-based**: o CI publica manifest + assets como GitHub Release artifacts. Não há server dedicado — a CLI baixa diretamente do GitHub.
 
-**Endpoints:**
+**Fluxo de publicação (CI):**
 
-| Método | Path | Descrição | Auth |
-|---|---|---|---|
-| `GET` | `/v1/manifest` | Retorna manifest completo com checksums | API Key |
-| `GET` | `/v1/manifest/version` | Retorna apenas a versão atual (health check rápido) | API Key |
-| `GET` | `/v1/profiles/:name` | Retorna definição resolvida de um perfil (com herança aplicada) | API Key |
-| `GET` | `/v1/assets/*path` | Download de um asset com header `X-SHA256` | API Key |
-| `POST` | `/v1/sync` | Recebe checksums locais, retorna lista de arquivos a atualizar | API Key |
-| `POST` | `/v1/verify` | Valida integridade de um conjunto de checksums | API Key |
-| `POST` | `/v1/telemetry` | Recebe beacon de métricas (fire-and-forget) | API Key |
-
-**Request/Response — POST /v1/sync:**
-
-```json
-// Request
-{
-  "profile": "fullstack-engineer",
-  "providers": ["opencode", "claude-code"],
-  "current_version": "2.0.0",
-  "local_checksums": {
-    "agents/code-reviewer.asdm.md": "e3b0c442...",
-    "skills/react-best-practices/SKILL.asdm.md": "d7a8fbb3..."
-  }
-}
-
-// Response
-{
-  "manifest_version": "2.1.0",
-  "action": "update",
-  "updates": [
-    {
-      "path": "agents/code-reviewer.asdm.md",
-      "sha256": "new_hash...",
-      "size": 2900,
-      "reason": "content_changed"
-    }
-  ],
-  "additions": [
-    {
-      "path": "skills/sql/SKILL.asdm.md",
-      "sha256": "another_hash...",
-      "size": 3200,
-      "reason": "added_to_profile"
-    }
-  ],
-  "removals": []
-}
+```bash
+# .github/workflows/publish.yml (ao merge em main)
+- build-manifest.ts gera manifest.json com SHA-256 de cada asset
+- gh release create v2.1.0 \
+    manifest.json \
+    agents/*.asdm.md \
+    skills/**/*.asdm.md \
+    commands/*.asdm.md \
+    policy.yaml
 ```
+
+**Fluxo de consumo (CLI):**
+
+```bash
+# asdm sync internamente faz:
+1. GET https://api.github.com/repos/{org}/{repo}/releases/latest
+   → obtém manifest.json
+2. Compara manifest.version com last_synced_version do lockfile
+3. Se diferente, baixa assets alterados via release download URL
+4. Verifica SHA-256 de cada asset baixado
+5. Executa emit adapters
+6. Grava lockfile
+```
+
+**Autenticação:** GitHub token (fine-grained, read-only no repo). Pode ser configurado via `GITHUB_TOKEN` ou `ASDM_GITHUB_TOKEN`.
+
+**Vantagens do modelo Git-based:**
+
+| Aspecto | Git-Based Registry | Server Dedicado (futuro) |
+|---|---|---|
+| Custo | $0 (GitHub Releases tem CDN global) | ~$0–5/mês (CF Worker free tier) |
+| Setup | Zero — o CI já existe | Deploy, DNS, secrets |
+| Sync incremental | CLI compara manifest local vs. remote | Server calcula diff |
+| Telemetria | Via arquivo local + CI (sem beacon) | POST /v1/telemetry |
+| Rate limiting | GitHub API (5000 req/h com token) | Custom |
+| Manutenção | Quase zero | Monitoramento, deploys |
+| Assets privados | Repo privado = assets privados | Auth customizada |
+
+> **Evolução planejada:** Na Fase 4+, um endpoint leve de telemetria pode ser adicionado (Cloudflare Worker + D1, Hono + Deno Deploy, ou Supabase) sem mudar o modelo de distribuição de assets.
 
 ### 3.9 Emit Adapters
 
@@ -532,13 +552,13 @@ interface EmittedFile {
 
 **Mapeamento de emissão por provider:**
 
-| Asset Type | OpenCode | Claude Code | GitHub Copilot |
-|---|---|---|---|
-| Agent | `.opencode/agents/{name}.md` + entry em `opencode.jsonc` | `.claude/agents/{name}.md` | `.github/agents/{name}.agent.md` com frontmatter YAML |
-| Skill | `.opencode/skills/{name}/SKILL.md` | `.claude/skills/{name}/SKILL.md` | Inline em `.github/instructions/{name}.instructions.md` |
-| Command | `.opencode/commands/{name}.md` | `.claude/commands/{name}.md` | Não suportado nativamente (emitido como instruction) |
-| Root instructions | `AGENTS.md` com `<available_skills>` | `CLAUDE.md` referenciando `AGENTS.md` | `.github/copilot-instructions.md` |
-| Config | `.opencode/opencode.jsonc` | `.claude/settings.json` | N/A |
+| Asset Type | OpenCode (com OCX) | OpenCode (sem OCX) | Claude Code | GitHub Copilot |
+|---|---|---|---|---|
+| Agent | `.opencode/agents/{name}.md` + entry em `opencode.jsonc` | `.opencode/agents/{name}.md` | `.claude/agents/{name}.md` | `.github/agents/{name}.agent.md` com frontmatter YAML |
+| Skill | `.opencode/skills/{name}/SKILL.md` | `.opencode/skills/{name}/SKILL.md` | `.claude/skills/{name}/SKILL.md` | Inline em `.github/instructions/{name}.instructions.md` |
+| Command | `.opencode/commands/{name}.md` | `.opencode/commands/{name}.md` | `.claude/commands/{name}.md` | Não suportado nativamente (emitido como instruction) |
+| Root instructions | `AGENTS.md` com `<available_skills>` | `AGENTS.md` | `CLAUDE.md` referenciando `AGENTS.md` | `.github/copilot-instructions.md` |
+| Config | `.opencode/opencode.jsonc` (com registry OCX) | `.opencode/opencode.jsonc` (config direta) | `.claude/settings.json` | N/A |
 
 ---
 
@@ -567,6 +587,7 @@ Comandos principais:
   sync          Sincroniza assets do registry para a máquina local
   verify        Verifica integridade dos arquivos managed
   status        Mostra diff entre local e registry
+  use           Troca o perfil ativo (ex: asdm use mobile)
 
 Comandos informativos:
   profiles      Lista perfis disponíveis no registry
@@ -596,26 +617,80 @@ Opções:
   --verbose            Output detalhado
 ```
 
-### 4.3 Configuração — `.asdm.json`
+**Troca de perfil:**
+
+```
+asdm use <profile-name>
+
+# Exemplos:
+  asdm use fullstack-engineer    # Troca para fullstack
+  asdm use mobile                # Troca para mobile
+  asdm use data-analytics        # Troca para data
+
+# O comando:
+# 1. Valida se o perfil está em allowed_profiles (policy corporativa)
+# 2. Grava em .asdm.local.json (gitignored, não altera .asdm.json)
+# 3. Roda sync automaticamente
+# O dev pode trocar a qualquer momento conforme a demanda.
+```
+
+### 4.3 Configuração em Camadas
+
+A configuração é resolvida em 3 camadas com merge e lock. Campos marcados como `locked` na policy corporativa (vinda do manifest) **não podem ser sobrescritos** pelo projeto nem pelo dev.
+
+**Camadas (em ordem de precedência):**
+
+| Camada | Arquivo | Versionado (git)? | Quem controla | O que define |
+|---|---|---|---|---|
+| **Corporativa** | `policy` no manifest (via GitHub Release) | No source repo | Platform team | `telemetry`, `install_hooks`, `auto_verify`, `allowed_profiles`, `allowed_providers`, `min_cli_version` |
+| **Projeto** | `.asdm.json` (raiz do repo) | Sim | Tech lead do repo | `registry`, `profile` (default do projeto), `providers` (subset do allowed) |
+| **Usuário** | `.asdm.local.json` (raiz do repo, **gitignored**) | Não | Dev individual | `profile` (override pessoal via `asdm use`) |
+
+**Resolução:** `corporate (locked) → projeto → usuário`. A CLI valida que valores de usuário estão dentro do `allowed_profiles` e `allowed_providers` definidos pela policy.
+
+**`.asdm.json` — O que vai pro git (simples, commitado pelo tech lead):**
 
 ```json
 {
-  "$schema": "https://asdm.internal.company.com/schemas/config.json",
-  "registry": "https://asdm.internal.company.com",
+  "$schema": "https://raw.githubusercontent.com/{org}/asdm-registry/main/schemas/config.json",
+  "registry": "github://{org}/asdm-registry",
   "profile": "fullstack-engineer",
-  "providers": ["opencode", "claude-code", "copilot"],
-  "auth": {
-    "type": "api-key",
-    "env_var": "ASDM_API_KEY"
-  },
-  "options": {
-    "auto_verify": true,
-    "telemetry": true,
-    "sync_on_git_pull": false,
-    "install_hooks": true
-  }
+  "providers": ["opencode", "claude-code", "copilot"]
 }
 ```
+
+**`.asdm.local.json` — Override pessoal do dev (gitignored):**
+
+```json
+{
+  "profile": "mobile"
+}
+```
+
+> Gerado automaticamente por `asdm use mobile`. O dev nunca precisa editar manualmente.
+
+**Fluxo de resolução na CLI:**
+
+```
+1. Lê .asdm.json (projeto) → obtém registry URL
+2. Baixa manifest do registry → extrai policy
+3. Lê .asdm.local.json (se existir) → obtém override de profile
+4. Merge: policy (locked) + projeto + local
+5. Valida: profile ∈ allowed_profiles? providers ⊆ allowed_providers?
+6. Se inválido → erro com mensagem clara e sugestão de fix
+7. Se válido → prossegue com sync
+```
+
+**O que cada camada pode e não pode:**
+
+| Campo | Corporativa (policy) | Projeto (.asdm.json) | Usuário (.asdm.local.json) |
+|---|---|---|---|
+| `registry` | Define default | Pode sobrescrever | ❌ |
+| `profile` | Define `allowed_profiles` | Define default do repo | ✅ Pode trocar via `asdm use` |
+| `providers` | Define `allowed_providers` | Define subset do repo | ❌ |
+| `telemetry` | 🔒 Locked | ❌ | ❌ |
+| `install_hooks` | 🔒 Locked | ❌ | ❌ |
+| `auto_verify` | 🔒 Locked | ❌ | ❌ |
 
 ### 4.4 Lockfile — `.asdm-lock.json`
 
@@ -623,11 +698,12 @@ Gerado automaticamente em cada sync. Serve para: detecção de drift, reprodutib
 
 ```json
 {
-  "$schema": "https://asdm.internal.company.com/schemas/lock.json",
+  "$schema": "https://raw.githubusercontent.com/{org}/asdm-registry/main/schemas/lock.json",
   "synced_at": "2026-03-31T14:22:00Z",
   "cli_version": "1.2.0",
   "manifest_version": "2.1.0",
   "manifest_commit": "a1b2c3d4e5f6",
+  "registry": "github://org/asdm-registry",
   "profile": "fullstack-engineer",
   "resolved_profiles": ["base", "fullstack-engineer"],
   "files": {
@@ -707,10 +783,10 @@ Permite que devs adicionem skills ou agents pessoais sem conflitar com o managed
 Source Repo (PR reviewed)
     │
     ▼ CI: build-manifest.ts
-Manifest com SHA-256 de cada asset canônico
+Manifest com SHA-256 de cada asset canônico + policy corporativa
     │
-    ▼ CI: publish.ts → Registry
-Registry serve assets com header X-SHA256
+    ▼ CI: publish.ts → GitHub Release
+Release com manifest.json + assets como artifacts
     │
     ▼ CLI: sync → download + verify
 Assets canônicos verificados na máquina do dev
@@ -816,51 +892,58 @@ Enviado pela CLI no final de cada `sync` e opcionalmente em `verify`. É fire-an
 
 ### Fase 1 — Foundation (Semanas 1–4)
 
-**Objetivo:** CLI funcional que sincroniza profiles do registry para OpenCode.
+**Objetivo:** CLI funcional que sincroniza profiles de um Git-based registry para OpenCode.
 
 **Entregas:**
 - Source repo scaffolding com estrutura de diretórios
+- `policy.yaml` com policy corporativa (locked fields, allowed profiles/providers)
 - JSON Schemas para todos os formatos (profile, agent, skill, command, manifest)
-- Script `build-manifest.ts` que gera manifest.json com SHA-256
+- Script `build-manifest.ts` que gera manifest.json com SHA-256 + policy embutida
 - GitHub Actions workflow para validação de PRs
-- GitHub Actions workflow para build + publish do manifest
-- Registry API mínima (GET manifest, GET assets, POST sync)
-- CLI: comandos `init`, `sync`, `verify`, `status`, `profiles`
+- GitHub Actions workflow para build manifest + criar GitHub Release
+- CLI: comandos `init`, `sync`, `verify`, `status`, `profiles`, `use`
+- Configuração em camadas (policy → projeto → usuário) com validação
 - Adapter OpenCode funcional (agents + skills + commands + config)
 - Lockfile generation e verificação
 
 **Critérios de aceite:**
 - `npx asdm init --profile fullstack-engineer` cria `.asdm.json`
-- `npx asdm sync` baixa assets e emite para `.opencode/`
+- `npx asdm sync` baixa assets do GitHub Release e emite para `.opencode/` (e/ou outros providers)
+- `npx asdm use mobile` grava `.asdm.local.json` e re-sincroniza
 - `npx asdm verify` detecta arquivo modificado manualmente
+- Policy corporativa impede dev de desabilitar telemetria ou trocar para perfil não permitido
 - CI bloqueia PR com schema inválido
-- CI publica manifest ao fazer merge em main
+- CI cria GitHub Release ao fazer merge em main
 
 **Tech stack:**
-- CLI: TypeScript, tsx, commander.js
-- Registry: Cloudflare Worker ou Node.js + Express
+- CLI: TypeScript (ESM), tsup (bundle single-file), citty ou commander.js
+- Registry v1: GitHub Releases (zero-server)
 - CI: GitHub Actions
 - Schemas: JSON Schema Draft 2020-12
+- Deps: yaml (parse frontmatter), crypto nativo (SHA-256), fetch nativo (Node 18+)
 
 ---
 
 ### Fase 2 — Multi-Provider (Semanas 5–7)
 
-**Objetivo:** Emitir para Claude Code e GitHub Copilot além de OpenCode.
+**Objetivo:** Emitir para Claude Code e GitHub Copilot além de OpenCode, com suporte a OpenCode com e sem OCX.
 
 **Entregas:**
 - Adapter Claude Code (agents → `.claude/agents/`, skills → `.claude/skills/`, CLAUDE.md)
 - Adapter GitHub Copilot (agents → `.github/agents/*.agent.md`, instructions, copilot-instructions.md)
+- Adapter OpenCode standalone (sem OCX) para ambientes que não usam OCX
 - Formato canônico `.asdm.md` com frontmatter multi-provider
 - Profile inheritance com deep merge
+- Comando `asdm use <profile>` para troca dinâmica de perfil
 - CLI: flag `--provider` para sync seletivo
 - Testes de integração com cada provider
 
 **Critérios de aceite:**
-- `npx asdm sync` emite para os 3 providers simultaneamente
+- `npx asdm sync` emite para todos os providers configurados simultaneamente
 - Cada provider recebe arquivos no formato nativo correto
-- OpenCode, Claude Code e Copilot conseguem ler os arquivos sem erro
+- OpenCode (com e sem OCX), Claude Code e Copilot conseguem ler os arquivos sem erro
 - Herança de perfis funciona (base + especialização)
+- `asdm use mobile` troca perfil e re-sincroniza automaticamente
 
 ---
 
@@ -889,10 +972,10 @@ Enviado pela CLI no final de cada `sync` e opcionalmente em `verify`. É fire-an
 **Objetivo:** Visibilidade completa de adoção, compliance e operações.
 
 **Entregas:**
-- Endpoint `POST /v1/telemetry` no registry
-- Beacon client na CLI (fire-and-forget, opt-in)
+- Telemetry API leve (Cloudflare Worker + D1, ou Hono + Deno Deploy, ou Supabase)
+- Endpoint `POST /v1/telemetry` (standalone, separado do registry de assets)
+- Beacon client na CLI (fire-and-forget, habilitado por policy corporativa)
 - Schema de eventos de telemetria
-- Metrics store (Postgres ou serviço de analytics)
 - Dashboard de adoção
 - Dashboard de compliance
 - Dashboard operacional
@@ -934,7 +1017,7 @@ Enviado pela CLI no final de cada `sync` e opcionalmente em `verify`. É fire-an
 
 O OCX é excelente para OpenCode, mas é específico para esse provider. Ele não emite para Claude Code ou Copilot. O modelo copy-and-own do OCX é ideal para flexibilidade individual, mas conflita com governança corporativa onde queremos garantir que todos usem a mesma versão dos agents.
 
-O ASDM pode coexistir com o OCX — inclusive, o adapter OpenCode pode gerar estrutura compatível com OCX para que devs que já usam OCX não precisem mudar seu workflow.
+O ASDM pode coexistir com o OCX — inclusive, o adapter OpenCode detecta se OCX está presente e gera estrutura compatível. Para ambientes sem OCX, o adapter OpenCode standalone gera a configuração diretamente. Devs que já usam OCX não precisam mudar seu workflow.
 
 ### 8.2 Por que não usar OpenSkills diretamente?
 
@@ -948,15 +1031,35 @@ A decisão de manter um formato canônico (`.asdm.md`) ao invés de manter N for
 
 O trade-off é a complexidade dos adapters, mas essa complexidade é isolada e testável.
 
-### 8.4 Registry como serviço vs. Git-only
+### 8.4 Git-based registry vs. Server dedicado
 
-Consideramos servir assets diretamente do Git (via raw URLs ou GitHub Releases), mas um serviço de registry permite: sync incremental (POST /v1/sync com diff), coleta de telemetria, controle de acesso granular, e caching de assets compilados.
+A v1 usa GitHub Releases como registry. O manifest e os assets são publicados como release artifacts pelo CI. A CLI baixa diretamente do GitHub, sem necessidade de server dedicado.
 
-Para equipes menores, o registry pode ser um Cloudflare Worker com assets em R2 — custo próximo de zero.
+**Vantagens:** custo zero, zero manutenção de infraestrutura, CDN global do GitHub, repos privados garantem assets privados, o CI já existe.
 
-### 8.5 Telemetria opt-in vs. mandatória
+**Trade-offs:** sync incremental precisa ser calculado pela CLI (compara manifest local vs. remote), não há telemetria nativa (adicionada na Fase 4 como serviço externo), rate limit do GitHub API (5000 req/h com token — não é limitante para uso corporativo).
 
-A telemetria é configurada como opt-in por respeito ao dev, mas recomendamos que a empresa habilite via configuração corporativa no `.asdm.json` distribuído pelo onboarding. O `machine_id` é um hash truncado que não identifica o dev individualmente — apenas permite contar máquinas únicas e detectar drift.
+**Evolução:** se necessário no futuro, a migração para um server dedicado (CF Worker + R2) requer apenas mudar a URL do `registry` no `.asdm.json` — a CLI já abstrai o transporte.
+
+### 8.5 Telemetria: policy-controlled
+
+A telemetria é controlada pela policy corporativa (campo `locked`). O dev não pode desabilitá-la localmente se a empresa definir `telemetry: true` na policy. O `machine_id` é um hash truncado que não identifica o dev individualmente — apenas permite contar máquinas únicas e detectar drift.
+
+Até a Fase 4 (quando a Telemetry API é implantada), a telemetria pode funcionar em modo **local-only**: a CLI grava eventos em `~/.config/asdm/telemetry.jsonl` e o `asdm doctor` consegue reportá-los. Quando a API estiver disponível, a CLI passa a enviar beacons automaticamente.
+
+### 8.6 Tech stack: CLI
+
+| Componente | Escolha | Justificativa |
+|---|---|---|
+| Linguagem | TypeScript (ESM) | Mesmo ecossistema dos devs, Node 18+ nativo |
+| Bundler | tsup | Bundle + minify em single file, < 5 MB |
+| CLI framework | citty (ou commander.js) | citty: ~8KB, moderno (ecossistema unjs). commander: 55KB, battle-tested |
+| YAML parser | `yaml` (npm) | ~90KB, compliant, sem deps nativas |
+| HTTP | `fetch` nativo | Node 18+ built-in, zero deps |
+| SHA-256 | `crypto` nativo | Node.js stdlib, zero deps |
+| Distribuição | npm (`@company/asdm`) + npx | Zero-install via npx, ou global install |
+
+**Total de deps nativas: zero.** Apenas Node.js ≥ 18 como pré-requisito.
 
 ---
 
@@ -966,9 +1069,9 @@ A telemetria é configurada como opt-in por respeito ao dev, mas recomendamos qu
 |---|---|---|---|
 | Baixa adoção pelos devs | Média | Alto | UX extremamente simples (`npx asdm sync`), onboarding automatizado, valor claro desde a Fase 1 |
 | Adapters quebram com atualização do provider | Média | Médio | Testes de integração por provider, versionamento de adapters, CI que testa contra providers reais |
-| Registry indisponível bloqueia devs | Baixa | Alto | Cache local persistente, `asdm verify` funciona offline, failover para asset estático |
+| Registry indisponível bloqueia devs | Baixa | Alto | Cache local persistente, `asdm verify` funciona offline, GitHub tem 99.9% uptime |
 | Resistência ao modelo managed (vs. copy-and-own) | Média | Médio | Overlay system para customizações, comunicação clara do valor de governança |
-| Conflito com OCX existente | Baixa | Baixo | Adapter OpenCode gera estrutura compatível, coexistência documentada |
+| Conflito com OCX existente | Baixa | Baixo | Adapter OpenCode detecta OCX e gera estrutura compatível; adapter standalone para ambientes sem OCX |
 
 ---
 
@@ -981,7 +1084,7 @@ A telemetria é configurada como opt-in por respeito ao dev, mas recomendamos qu
 | Taxa de integridade (sem drift) | 80% | 95% |
 | Providers ativos por dev (média) | 1.5 | 2.0 |
 | Tempo de onboarding de dev novo | < 10 min | < 5 min |
-| Uptime do registry | 99.5% | 99.9% |
+| Uptime do registry | 99.9% (GitHub SLA) | 99.9% |
 
 ---
 
@@ -992,15 +1095,17 @@ A telemetria é configurada como opt-in por respeito ao dev, mas recomendamos qu
 | **Agent** | Personalidade de AI com instruções, modelo e permissões definidos |
 | **Skill** | Conjunto de instruções estáticas que ensinam o AI a completar uma tarefa específica (formato SKILL.md) |
 | **Command** | Slash command que o dev invoca para acionar um agent ou workflow |
-| **Profile** | Conjunto nomeado de agents, skills e commands para um papel específico |
-| **Manifest** | Arquivo JSON com metadados e checksums de todos os assets de uma versão |
+| **Profile** | Conjunto nomeado de agents, skills e commands para um papel específico. O dev pode trocar de perfil a qualquer momento via `asdm use <profile>` |
+| **Manifest** | Arquivo JSON com metadados, checksums e policy corporativa — publicado como GitHub Release |
+| **Policy** | Configuração corporativa embutida no manifest que define campos locked, perfis e providers permitidos |
 | **Lockfile** | Arquivo local que registra checksums de todos os arquivos emitidos |
-| **Adapter** | Módulo que converte formato canônico ASDM para formato nativo de um provider |
-| **Provider** | Ferramenta de AI coding (OpenCode, Claude Code, GitHub Copilot) |
+| **Adapter** | Módulo que converte formato canônico ASDM para formato nativo de um provider (ex: OpenCode com/sem OCX, Claude Code, Copilot) |
+| **Provider** | Ferramenta de AI coding (OpenCode, Claude Code, GitHub Copilot, Cursor, Windsurf, etc.) |
 | **Overlay** | Customizações pessoais do dev que são aditivas ao perfil managed |
 | **Drift** | Divergência entre o estado local e o esperado pelo lockfile |
-| **Beacon** | Pacote leve de telemetria enviado pela CLI ao registry |
+| **Beacon** | Pacote leve de telemetria enviado pela CLI (Fase 4+) |
 | **Tampering** | Modificação não autorizada de um arquivo managed |
+| **Git-based Registry** | Modelo de distribuição onde manifest + assets são publicados como GitHub Release artifacts (v1) |
 
 ---
 

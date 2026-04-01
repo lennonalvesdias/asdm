@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ASDM — Agent Skills Distribution Manager — Arquitetura</title>
+<title>ASDM — Agentic Software Delivery Model — Arquitetura</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -414,8 +414,8 @@ footer {
 <div class="hero">
   <span class="badge">RFC — Documento de Arquitetura</span>
   <h1>ASDM</h1>
-  <p class="subtitle">Agent Skills Distribution Manager</p>
-  <p class="desc">Plataforma corporativa para gestão centralizada, distribuição segura e metrificação de agents, commands e skills — multi-provider por design.</p>
+  <p class="subtitle">Agentic Software Delivery Model</p>
+  <p class="desc">Modelo corporativo para organização unificada, distribuição segura e metrificação de agents, commands e skills — multi-provider por design. Uma única fonte de verdade, exportada para OpenCode (com e sem OCX), Claude Code, GitHub Copilot e extensível a outros.</p>
 </div>
 
 <nav>
@@ -446,7 +446,7 @@ footer {
     <div class="card">
       <div class="icon">🔀</div>
       <h4>Fragmentação de formatos</h4>
-      <p>OpenCode usa <code>.opencode/</code> com OCX, Claude Code usa <code>.claude/</code> com SKILL.md, Copilot usa <code>.github/agents/</code> com instructions.md. Cada dev mantém 3+ configurações.</p>
+      <p>OpenCode usa <code>.opencode/</code> com OCX, Claude Code usa <code>.claude/</code> com SKILL.md, Copilot usa <code>.github/agents/</code> com instructions.md. Cada provider tem seu próprio formato e manter múltiplas configurações é insustentável.</p>
     </div>
     <div class="card">
       <div class="icon">🔓</div>
@@ -503,20 +503,21 @@ footer {
     <div class="diagram-row">
       <div class="diagram-box cli">ASDM CLI</div>
     </div>
-    <div class="diagram-arrow">↕ <small>HTTPS + SHA-256 verify</small></div>
+    <div class="diagram-arrow">↕ <small>GitHub API + SHA-256 verify</small></div>
     <div class="diagram-row">
-      <div class="diagram-box registry">ASDM Registry API</div>
+      <div class="diagram-box registry">Git-Based Registry (GitHub Releases)</div>
     </div>
     <div class="diagram-arrow">↕</div>
     <div class="diagram-row">
-      <div class="diagram-box security">Git Repo (Source of Truth)</div>
-      <div class="diagram-box security">Metrics Store</div>
+      <div class="diagram-box security">Source Repo (Single Source of Truth)</div>
+      <div class="diagram-box security" style="opacity:0.5">Telemetry API (Fase 4+)</div>
     </div>
     <div class="diagram-arrow">↓ <small>emit adapters</small></div>
     <div class="diagram-row">
-      <div class="diagram-box provider">OpenCode / OCX</div>
+      <div class="diagram-box provider">OpenCode (com/sem OCX)</div>
       <div class="diagram-box provider">Claude Code</div>
       <div class="diagram-box provider">GitHub Copilot</div>
+      <div class="diagram-box provider" style="opacity:0.6">Cursor / Windsurf / ...</div>
     </div>
   </div>
 
@@ -529,18 +530,18 @@ footer {
       </thead>
       <tbody>
         <tr>
-          <td><strong>ASDM Registry</strong></td>
-          <td>API centralizada para servir manifests, profiles e assets versionados</td>
-          <td>Node.js / Cloudflare Workers</td>
+          <td><strong>Git-Based Registry</strong></td>
+          <td>Manifest + assets publicados como GitHub Release artifacts pelo CI</td>
+          <td>GitHub Releases + GitHub Actions</td>
         </tr>
         <tr>
           <td><strong>ASDM CLI</strong></td>
           <td>Sincronização local, validação de integridade, emissão multi-provider</td>
-          <td>TypeScript, distribuído via npm</td>
+          <td>TypeScript (ESM), tsup, citty</td>
         </tr>
         <tr>
           <td><strong>Source Repo</strong></td>
-          <td>Git repo monorepo com todos os profiles, agents, skills e commands</td>
+          <td>Git repo monorepo com todos os profiles, agents, skills, commands e policy</td>
           <td>Git + CI/CD (GitHub Actions)</td>
         </tr>
         <tr>
@@ -554,9 +555,9 @@ footer {
           <td>SHA-256 + manifest locks</td>
         </tr>
         <tr>
-          <td><strong>Metrics Collector</strong></td>
-          <td>Telemetria de syncs, versões ativas, drift de integridade</td>
-          <td>Lightweight beacon → data store</td>
+          <td><strong>Telemetry API</strong></td>
+          <td>Coleta de beacons de sync/verify (adicionada na Fase 4)</td>
+          <td>CF Worker + D1 / Hono / Supabase</td>
         </tr>
       </tbody>
     </table>
@@ -565,63 +566,71 @@ footer {
 
 <!-- 04 — REGISTRY -->
 <section id="registry">
-  <h2><span class="num">04</span> ASDM Registry</h2>
-  <p>O Registry é o coração da plataforma. Ele é um serviço HTTP que serve o manifest de versões e os assets (arquivos de agents, skills, commands) assinados com checksums.</p>
+  <h2><span class="num">04</span> Git-Based Registry</h2>
+  <p>Na v1, o registry é <strong>Git-based</strong>: o CI publica manifest + assets como GitHub Release artifacts. Custo zero, zero infraestrutura, CDN global do GitHub.</p>
 
-  <h3>Manifest Schema</h3>
+  <h3>Manifest Schema (com Policy Corporativa)</h3>
   <pre><code>{
   "version": "2.1.0",
   "published_at": "2026-03-31T12:00:00Z",
+  "commit_sha": "a1b2c3d4e5f6",
+
+  "policy": {
+    "locked_fields": ["telemetry", "install_hooks"],
+    "telemetry": true,
+    "auto_verify": true,
+    "install_hooks": true,
+    "allowed_profiles": ["base", "fullstack-engineer", "data-analytics", "mobile"],
+    "allowed_providers": ["opencode", "claude-code", "copilot"],
+    "min_cli_version": "1.0.0"
+  },
+
   "profiles": {
     "fullstack-engineer": {
       "extends": ["base"],
-      "description": "Perfil para devs fullstack",
       "agents": ["code-reviewer", "tdd-guide", "architect"],
-      "skills": ["docx", "pdf", "react-best-practices", "api-design"],
+      "skills": ["react-best-practices", "api-design"],
       "commands": ["review", "test", "deploy-preview"],
       "providers": ["opencode", "claude-code", "copilot"]
     },
     "data-analytics": {
       "extends": ["base"],
-      "agents": ["data-pipeline", "sql-optimizer", "viz-builder"],
-      "skills": ["pandas", "sql", "dbt", "jupyter"],
-      "commands": ["query", "pipeline", "notebook"],
-      "providers": ["opencode", "claude-code", "copilot"]
+      "agents": ["data-pipeline", "sql-optimizer"],
+      "skills": ["pandas", "sql", "dbt"],
+      "commands": ["query", "pipeline"]
     },
     "mobile": {
       "extends": ["base"],
       "agents": ["mobile-architect", "ui-reviewer"],
-      "skills": ["react-native", "swift-ui", "kotlin-compose"],
-      "commands": ["build-ios", "build-android", "e2e"],
-      "providers": ["opencode", "claude-code", "copilot"]
+      "skills": ["react-native", "swift-ui"],
+      "commands": ["build-ios", "build-android"]
     }
   },
+
   "assets": {
-    "agents/code-reviewer.md": {
+    "agents/code-reviewer.asdm.md": {
       "sha256": "a1b2c3d4...",
-      "size": 4521,
-      "updated_at": "2026-03-30T10:00:00Z"
+      "size": 4521
     }
   }
 }</code></pre>
 
-  <h3>API Endpoints</h3>
+  <h3>Fluxo de Publicação e Consumo</h3>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Endpoint</th><th>Método</th><th>Descrição</th></tr></thead>
+      <thead><tr><th>Etapa</th><th>Quem</th><th>O que acontece</th></tr></thead>
       <tbody>
-        <tr><td><code>/v1/manifest</code></td><td>GET</td><td>Retorna manifest completo com checksums</td></tr>
-        <tr><td><code>/v1/profiles/:name</code></td><td>GET</td><td>Retorna definição de um perfil específico</td></tr>
-        <tr><td><code>/v1/assets/:path</code></td><td>GET</td><td>Download do arquivo com header X-SHA256</td></tr>
-        <tr><td><code>/v1/sync</code></td><td>POST</td><td>Recebe checksums locais, retorna diff de arquivos</td></tr>
-        <tr><td><code>/v1/telemetry</code></td><td>POST</td><td>Recebe beacon de métricas da CLI</td></tr>
-        <tr><td><code>/v1/verify</code></td><td>POST</td><td>Valida integridade de um conjunto de arquivos</td></tr>
+        <tr><td><strong>Merge to main</strong></td><td>CI</td><td><code>build-manifest.ts</code> gera manifest.json com SHA-256 + policy</td></tr>
+        <tr><td><strong>Create Release</strong></td><td>CI</td><td><code>gh release create vX.Y.Z</code> com manifest + todos os assets</td></tr>
+        <tr><td><strong>asdm sync</strong></td><td>CLI</td><td>GET <code>/releases/latest</code> → baixa manifest → compara com lockfile</td></tr>
+        <tr><td><strong>Download diff</strong></td><td>CLI</td><td>Baixa apenas assets com SHA-256 diferente do lockfile local</td></tr>
+        <tr><td><strong>Verify + Emit</strong></td><td>CLI</td><td>Verifica SHA-256, executa emit adapters, grava lockfile</td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="callout">
-    <p><strong>Hosting flexível:</strong> O Registry pode rodar como Cloudflare Worker (zero-infra), como container Docker interno, ou até servido diretamente de um bucket S3 com um CDN na frente — desde que os checksums estejam no manifest.</p>
+    <p><strong>Custo: $0.</strong> GitHub Releases tem CDN global, suporta assets privados (repos privados), e o CI já existe. Na Fase 4+, uma Telemetry API leve (CF Worker / Hono / Supabase) pode ser adicionada sem alterar o modelo de distribuição.</p>
   </div>
 </section>
 
@@ -636,6 +645,10 @@ npx asdm sync
 
 # Sincroniza perfil específico
 npx asdm sync --profile fullstack-engineer
+
+# Troca de perfil ativo (grava em .asdm.local.json, re-sincroniza)
+npx asdm use mobile
+npx asdm use fullstack-engineer
 
 # Verifica integridade dos arquivos locais
 npx asdm verify
@@ -655,17 +668,50 @@ npx asdm sync --force
 # Sync apenas para um provider específico
 npx asdm sync --provider opencode</code></pre>
 
-  <h3>Configuração Local</h3>
-  <p>Arquivo <code>.asdm.json</code> na raiz do projeto ou <code>~/.config/asdm/config.json</code> para global:</p>
+  <h3>Configuração em Camadas</h3>
+  <p>A configuração é resolvida em 3 camadas. Campos <code>locked</code> na policy corporativa (manifest) não podem ser sobrescritos.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Camada</th><th>Arquivo</th><th>Git?</th><th>Quem controla</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Corporativa</strong></td>
+          <td><code>policy</code> no manifest (via GitHub Release)</td>
+          <td>No source repo</td>
+          <td>Platform team</td>
+        </tr>
+        <tr>
+          <td><strong>Projeto</strong></td>
+          <td><code>.asdm.json</code> (raiz do repo)</td>
+          <td>Sim</td>
+          <td>Tech lead do repo</td>
+        </tr>
+        <tr>
+          <td><strong>Usuário</strong></td>
+          <td><code>.asdm.local.json</code> (gitignored)</td>
+          <td>Não</td>
+          <td>Dev individual</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><strong>.asdm.json</strong> — commitado pelo tech lead (define defaults do projeto):</p>
   <pre><code>{
-  "registry": "https://asdm.internal.company.com",
+  "registry": "github://org/asdm-registry",
   "profile": "fullstack-engineer",
-  "providers": ["opencode", "claude-code", "copilot"],
-  "auto_verify": true,
-  "telemetry": true,
-  "sync_on_git_pull": true,
-  "lockfile": ".asdm-lock.json"
+  "providers": ["opencode", "claude-code", "copilot"]
 }</code></pre>
+
+  <p><strong>.asdm.local.json</strong> — gerado por <code>asdm use</code> (gitignored, override pessoal):</p>
+  <pre><code>{
+  "profile": "mobile"
+}</code></pre>
+
+  <div class="callout">
+    <p><strong>Resolução:</strong> <code>policy (locked) → projeto → usuário</code>. A CLI valida que o perfil escolhido está em <code>allowed_profiles</code> e os providers em <code>allowed_providers</code>. Campos locked (telemetria, hooks) não podem ser desabilitados pelo dev.</p>
+  </div>
 
   <h3>Lockfile (<code>.asdm-lock.json</code>)</h3>
   <p>Gerado automaticamente após cada sync. Garante reprodutibilidade e permite detectar drift.</p>
@@ -704,11 +750,18 @@ npx asdm sync --provider opencode</code></pre>
       </thead>
       <tbody>
         <tr>
-          <td><strong>OpenCode (OCX)</strong></td>
+          <td><strong>OpenCode (com OCX)</strong></td>
           <td><code>.opencode/agents/*.md</code></td>
           <td><code>.opencode/skills/*/SKILL.md</code></td>
           <td><code>AGENTS.md</code></td>
-          <td><code>.opencode/opencode.jsonc</code></td>
+          <td><code>.opencode/opencode.jsonc</code> (com registry OCX)</td>
+        </tr>
+        <tr>
+          <td><strong>OpenCode (sem OCX)</strong></td>
+          <td><code>.opencode/agents/*.md</code></td>
+          <td><code>.opencode/skills/*/SKILL.md</code></td>
+          <td><code>AGENTS.md</code></td>
+          <td><code>.opencode/opencode.jsonc</code> (config direta)</td>
         </tr>
         <tr>
           <td><strong>Claude Code</strong></td>
@@ -764,7 +817,7 @@ Você é um code reviewer sênior. Sua função é...
     </li>
     <li>
       <strong>2. Transform</strong>
-      <span>Aplica regras específicas do provider (ex: adicionar frontmatter <code>on:</code> para Copilot, gerar <code>opencode.jsonc</code> entries para OCX)</span>
+      <span>Aplica regras específicas do provider (ex: adicionar frontmatter <code>on:</code> para Copilot, gerar <code>opencode.jsonc</code> entries para OpenCode com/sem OCX)</span>
     </li>
     <li>
       <strong>3. Emit</strong>
@@ -839,7 +892,7 @@ npx asdm verify --strict
   </div>
 
   <div class="callout warn">
-    <p><strong>Importante:</strong> O modelo copy-and-own do OCX é ótimo para flexibilidade individual, mas conflita com governança. O ASDM assume um modelo de <em>managed distribution</em>: arquivos emitidos são tratados como artefatos gerenciados. Se o dev precisa customizar, ele cria um overlay local que é separado do managed set.</p>
+    <p><strong>Importante:</strong> O modelo copy-and-own do OCX é ótimo para flexibilidade individual, mas conflita com governança. O ASDM assume um modelo de <em>managed distribution</em>: arquivos emitidos são tratados como artefatos gerenciados. Se o dev precisa customizar, ele cria um overlay local que é separado do managed set. O ASDM funciona tanto com OCX instalado (gerando estrutura compatível) quanto sem.</p>
   </div>
 </section>
 
@@ -897,7 +950,7 @@ npx asdm verify --strict
 <!-- 09 — PERFIS -->
 <section id="perfis">
   <h2><span class="num">09</span> Sistema de Perfis</h2>
-  <p>Perfis são a unidade principal de organização. Eles usam herança e composição para evitar duplicação.</p>
+  <p>Perfis são a unidade principal de organização. Eles usam herança e composição para evitar duplicação. O dev pode trocar de perfil a qualquer momento com <code>asdm use &lt;perfil&gt;</code> conforme a demanda do projeto.</p>
 
   <h3>Modelo de Herança</h3>
   <pre><code>┌─────────────────────────────┐
@@ -966,17 +1019,19 @@ npx asdm verify --strict
 │   ├── test.asdm.md
 │   └── deploy-preview.asdm.md
 ├── adapters/
-│   ├── opencode.ts       # Emit adapter para OpenCode/OCX
+│   ├── opencode.ts       # Emit adapter para OpenCode (com OCX)
+│   ├── opencode-standalone.ts  # Emit adapter para OpenCode (sem OCX)
 │   ├── claude-code.ts    # Emit adapter para Claude Code
 │   └── copilot.ts        # Emit adapter para GitHub Copilot
 ├── scripts/
-│   ├── build-manifest.ts # Gera manifest.json com checksums
+│   ├── build-manifest.ts # Gera manifest.json com checksums + policy
 │   ├── validate.ts       # Valida schemas dos .asdm.md
-│   └── publish.ts        # Publica no registry
+│   └── publish.ts        # Cria GitHub Release com manifest + assets
 ├── .github/
 │   └── workflows/
 │       ├── validate.yml  # PR validation
-│       └── publish.yml   # Release → build manifest → deploy registry
+│       └── publish.yml   # Merge → build manifest → create GitHub Release
+├── policy.yaml           # Corporate policy (locked fields, allowed profiles/providers)
 ├── manifest.json         # Gerado automaticamente
 └── asdm.config.ts        # Config do build pipeline</code></pre>
 </section>
@@ -988,22 +1043,22 @@ npx asdm verify --strict
   <h3>A. Dev Sincroniza (dia a dia)</h3>
   <ul class="flow-list">
     <li><strong>npx asdm sync</strong><span>Dev roda o comando no terminal</span></li>
-    <li><strong>CLI lê .asdm.json</strong><span>Identifica profile, registry URL, providers ativos</span></li>
-    <li><strong>POST /v1/sync</strong><span>Envia checksums locais ao registry</span></li>
-    <li><strong>Registry calcula diff</strong><span>Retorna apenas arquivos novos ou modificados</span></li>
-    <li><strong>Download + verify</strong><span>Baixa assets, verifica SHA-256 de cada um</span></li>
+    <li><strong>CLI lê .asdm.json + .asdm.local.json</strong><span>Identifica registry, profile efetivo, providers ativos</span></li>
+    <li><strong>GET /releases/latest</strong><span>Baixa manifest.json da GitHub Release mais recente</span></li>
+    <li><strong>Aplica policy corporativa</strong><span>Valida profile e providers contra allowed_profiles/allowed_providers</span></li>
+    <li><strong>Compara manifest vs. lockfile</strong><span>CLI calcula diff localmente - quais assets mudaram?</span></li>
+    <li><strong>Download + verify</strong><span>Baixa apenas assets alterados, verifica SHA-256 de cada um</span></li>
     <li><strong>Emit adapters rodam</strong><span>Converte para formato nativo de cada provider</span></li>
     <li><strong>Lockfile atualizado</strong><span>.asdm-lock.json gravado com novos hashes</span></li>
-    <li><strong>Beacon de telemetria</strong><span>Envia métricas de sync ao collector</span></li>
   </ul>
 
   <h3>B. Platform Team Publica Nova Versão</h3>
   <ul class="flow-list">
-    <li><strong>PR no source repo</strong><span>Tech lead abre PR com mudanças em agents/skills</span></li>
+    <li><strong>PR no source repo</strong><span>Tech lead abre PR com mudanças em agents/skills/policy</span></li>
     <li><strong>CI: validate.yml</strong><span>Valida schemas, checa frontmatter, roda linting</span></li>
     <li><strong>Code review + merge</strong><span>Aprovação por pelo menos 2 platform admins</span></li>
-    <li><strong>CI: publish.yml</strong><span>Build manifest (com checksums), deploy ao registry</span></li>
-    <li><strong>Devs detectam no próximo sync</strong><span>CLI avisa que há nova versão disponível</span></li>
+    <li><strong>CI: publish.yml</strong><span>Build manifest (checksums + policy), cria GitHub Release com assets</span></li>
+    <li><strong>Devs detectam no próximo sync</strong><span>CLI compara manifest version e avisa que há atualização</span></li>
   </ul>
 
   <h3>C. Detecção de Tampering</h3>
@@ -1012,7 +1067,7 @@ npx asdm verify --strict
     <li><strong>Pre-commit hook: asdm verify</strong><span>Detecta SHA-256 divergente</span></li>
     <li><strong>Commit bloqueado</strong><span>Mensagem clara: "arquivo X foi modificado fora do ASDM"</span></li>
     <li><strong>Dev escolhe</strong><span><code>asdm sync --force</code> para restaurar, ou move customização para overlay</span></li>
-    <li><strong>Beacon reporta violation</strong><span>Dashboard de compliance atualizado</span></li>
+    <li><strong>Beacon reporta violation</strong><span>Dashboard de compliance atualizado (Fase 4+ com Telemetry API)</span></li>
   </ul>
 </section>
 
@@ -1026,12 +1081,12 @@ npx asdm verify --strict
       <tbody>
         <tr>
           <td><span class="tag green">Fase 1 — Foundation</span></td>
-          <td>Source repo + manifest build + CLI básica (sync, verify) + adapter OpenCode</td>
+          <td>Source repo + Git-based registry (GitHub Releases) + policy corporativa + CLI (sync, verify, use) + adapter OpenCode + config em camadas</td>
           <td>3–4 semanas</td>
         </tr>
         <tr>
           <td><span class="tag blue">Fase 2 — Multi-Provider</span></td>
-          <td>Adapters Claude Code + Copilot, formato canônico .asdm.md, profiles com herança</td>
+          <td>Adapters Claude Code + Copilot + OpenCode standalone, formato canônico .asdm.md, profiles com herança</td>
           <td>2–3 semanas</td>
         </tr>
         <tr>
@@ -1041,7 +1096,7 @@ npx asdm verify --strict
         </tr>
         <tr>
           <td><span class="tag orange">Fase 4 — Metrics</span></td>
-          <td>Telemetry beacons, metrics store, dashboards de adoção e compliance</td>
+          <td>Telemetry API leve (CF Worker / Hono / Supabase), beacons, dashboards de adoção e compliance</td>
           <td>2–3 semanas</td>
         </tr>
         <tr>
@@ -1054,7 +1109,7 @@ npx asdm verify --strict
   </div>
 
   <div class="callout success">
-    <p><strong>Dica de quick start:</strong> A Fase 1 já entrega valor. Mesmo sem multi-provider, ter um <code>npx asdm sync</code> que distribui profiles versionados para OpenCode com verificação de integridade já resolve os maiores problemas de governança.</p>
+    <p><strong>Dica de quick start:</strong> A Fase 1 já entrega valor. Com Git-based registry (custo zero) e <code>npx asdm sync</code>, você distribui profiles versionados com verificação de integridade e policy corporativa desde o dia 1.</p>
   </div>
 
   <h3>Integrações Futuras</h3>
@@ -1074,7 +1129,7 @@ npx asdm verify --strict
 
 <footer>
   <div class="container">
-    <p>ASDM — Agent Skills Distribution Manager — Documento de Arquitetura v1.0</p>
+    <p>ASDM — Agentic Software Delivery Model — Documento de Arquitetura v1.0</p>
     <p>Gerado em 31 de Março de 2026</p>
   </div>
 </footer>
