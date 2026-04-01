@@ -12,6 +12,7 @@
  *
  * Run with: tsx scripts/validate.ts
  */
+// Registry validator — runs in CI and locally via `npm run validate:registry`
 
 import { readFile } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
