@@ -6,9 +6,37 @@
  */
 
 import { defineCommand } from 'citty'
+import path from 'node:path'
 import { sync } from '../../core/syncer.js'
 import { TelemetryWriter } from '../../core/telemetry.js'
 import { logger } from '../../utils/logger.js'
+import { exists, getGlobalConfigPath } from '../../utils/fs.js'
+import { ConfigError } from '../../utils/errors.js'
+
+/**
+ * Resolve the config file path to use for sync.
+ *
+ * Resolution order:
+ *   1. Local .asdm.json (always checked first)
+ *   2. Global ~/.config/asdm/config.json (only if --global and no local config)
+ *   3. ConfigError if neither is found
+ */
+async function resolveConfigPath(cwd: string, isGlobal: boolean): Promise<string> {
+  const localPath = path.join(cwd, '.asdm.json')
+  if (await exists(localPath)) return localPath
+
+  if (isGlobal) {
+    const globalPath = getGlobalConfigPath()
+    if (await exists(globalPath)) return globalPath
+  }
+
+  throw new ConfigError(
+    'No config found.',
+    isGlobal
+      ? 'Run `asdm init` (project) or `asdm init --global` (machine-wide setup).'
+      : 'Run `asdm init` to initialize this project.'
+  )
+}
 
 export default defineCommand({
   meta: {
@@ -57,8 +85,11 @@ export default defineCommand({
     const telemetry = new TelemetryWriter(cwd)
 
     try {
+      const configPath = await resolveConfigPath(cwd, ctx.args.global ?? false)
+
       const result = await sync({
         cwd,
+        configPath,
         force: ctx.args.force,
         dryRun,
         verbose,

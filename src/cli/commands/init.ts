@@ -4,16 +4,17 @@
  * Creates a project config file with registry, profile, and provider defaults.
  * Exits early if config already exists unless --force is passed.
  *
- * Gitignore integration:
+ * Flags:
+ *   --global      Write config to ~/.config/asdm/config.json instead of .asdm.json.
  *   --gitignore   Automatically add ASDM output dirs to .gitignore after init.
  *   (omitted)     In a TTY, prints a tip to run `asdm gitignore` manually.
  */
 
 import { defineCommand } from 'citty'
 import path from 'node:path'
-import { exists } from '../../utils/fs.js'
+import { exists, ensureDir, getGlobalConfigPath } from '../../utils/fs.js'
 import { updateGitignore } from '../../utils/gitignore.js'
-import { createProjectConfig } from '../../core/config.js'
+import { createProjectConfig, createProjectConfigAtPath } from '../../core/config.js'
 import { TelemetryWriter } from '../../core/telemetry.js'
 import { logger } from '../../utils/logger.js'
 
@@ -38,7 +39,12 @@ export default defineCommand({
     },
     force: {
       type: 'boolean',
-      description: 'Overwrite existing .asdm.json',
+      description: 'Overwrite existing config',
+      default: false,
+    },
+    global: {
+      type: 'boolean',
+      description: 'Write config to ~/.config/asdm/config.json instead of .asdm.json',
       default: false,
     },
     gitignore: {
@@ -49,6 +55,35 @@ export default defineCommand({
   },
   async run(ctx) {
     const cwd = process.cwd()
+    const profile = ctx.args.profile || 'base'
+    const registry = ctx.args.registry || DEFAULT_REGISTRY
+    const providers: Array<'opencode' | 'claude-code' | 'copilot'> = ['opencode']
+
+    if (ctx.args.global) {
+      const targetPath = getGlobalConfigPath()
+      const alreadyExists = await exists(targetPath)
+
+      if (alreadyExists && !ctx.args.force) {
+        logger.warn(`Global config already exists at ${targetPath}. Use --force to overwrite.`)
+        return
+      }
+
+      try {
+        await ensureDir(path.dirname(targetPath))
+        await createProjectConfigAtPath(targetPath, registry, profile, providers)
+        logger.success(`Global config written to ${targetPath}`)
+        logger.info(`Registry: ${registry}`)
+        logger.info('Next step: run `asdm sync --global` to install agents, skills, and commands')
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        logger.error(message)
+        process.exitCode = 1
+        return
+      }
+      return
+    }
+
+    // Local init (existing behavior)
     const configPath = path.join(cwd, '.asdm.json')
 
     const alreadyExists = await exists(configPath)
@@ -56,12 +91,6 @@ export default defineCommand({
       logger.warn('.asdm.json already exists. Use --force to overwrite.')
       return
     }
-
-    const profile = ctx.args.profile || 'base'
-    const registry = ctx.args.registry || DEFAULT_REGISTRY
-
-    // Default providers written by createProjectConfig
-    const providers: Array<'opencode' | 'claude-code' | 'copilot'> = ['opencode']
 
     try {
       await createProjectConfig(cwd, registry, profile, providers)

@@ -15,13 +15,13 @@
  */
 
 import path from 'node:path'
-import { readProjectConfig, readUserConfig, resolveConfig } from './config.js'
+import { readProjectConfigFromPath, readUserConfig, resolveConfig } from './config.js'
 import { RegistryClient } from './registry-client.js'
 import { resolveProfileFromManifest } from './profile-resolver.js'
 import { getProfileAssetPaths, diffManifest } from './manifest.js'
 import { readLockfile, buildLockfile, writeLockfile, createLockEntry } from './lockfile.js'
 import { hashString } from './hash.js'
-import { writeFile, ensureDir, getAsdmCacheDir, resolveGlobalEmitPath, getGlobalLockfilePath } from '../utils/fs.js'
+import { writeFile, readFile, ensureDir, getAsdmCacheDir, resolveGlobalEmitPath, getGlobalLockfilePath } from '../utils/fs.js'
 import { IntegrityError } from '../utils/errors.js'
 import type { EmitAdapter, EmittedFile } from '../adapters/base.js'
 import type { ParsedAsset } from './parser.js'
@@ -30,6 +30,7 @@ import type { TelemetryWriter } from './telemetry.js'
 
 export interface SyncOptions {
   cwd: string
+  configPath?: string      // Explicit path to config file; defaults to cwd/.asdm.json
   force?: boolean         // Re-download all assets (ignore cache)
   dryRun?: boolean        // Show what would be done, don't write
   noEmit?: boolean        // Download assets but don't emit to providers
@@ -101,7 +102,8 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
 
   try {
     // Step 1: Read config
-    const projectConfig = await readProjectConfig(cwd)
+    const configFilePath = options.configPath ?? path.join(cwd, '.asdm.json')
+    const projectConfig = await readProjectConfigFromPath(configFilePath)
     const userConfig = await readUserConfig(cwd)
     
     // Step 2: Initialize registry client
@@ -186,7 +188,6 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
     for (const assetPath of diff.unchanged) {
       const cachedPath = path.join(cacheDir, assetPath)
       try {
-        const { readFile } = await import('../utils/fs.js')
         const cached = await readFile(cachedPath)
         if (cached) downloadedAssets.set(assetPath, cached)
       } catch {
@@ -278,7 +279,7 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
     for (const emittedFile of allEmittedFiles) {
       const absolutePath = resolvedPaths.get(emittedFile.relativePath)
       if (absolutePath === undefined) continue
-      await writeFile(absolutePath, emittedFile.content as string)
+      await writeFile(absolutePath, emittedFile.content)
     }
     
     // Step 12: Build and write lockfile

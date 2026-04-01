@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import os from 'node:os'
 import path from 'node:path'
-import { resolveGlobalEmitPath, getGlobalLockfilePath } from '../../../src/utils/fs.js'
+import { resolveGlobalEmitPath, getGlobalLockfilePath, getGlobalConfigPath } from '../../../src/utils/fs.js'
 
 describe('resolveGlobalEmitPath', () => {
   it('resolves opencode agent path', () => {
@@ -63,5 +63,30 @@ describe('getGlobalLockfilePath', () => {
   it('lives under the user home directory', () => {
     const p = getGlobalLockfilePath()
     expect(p.startsWith(os.homedir())).toBe(true)
+  })
+})
+
+describe('getGlobalConfigPath', () => {
+  it('returns a path ending with config.json inside the asdm dir', () => {
+    const p = getGlobalConfigPath()
+    expect(p).toContain('asdm')
+    expect(p).toContain('config.json')
+    expect(p).toContain(path.join('asdm', 'config.json'))
+  })
+
+  it('is an absolute path', () => {
+    const p = getGlobalConfigPath()
+    expect(path.isAbsolute(p)).toBe(true)
+  })
+
+  it('lives under the user home directory', () => {
+    const p = getGlobalConfigPath()
+    expect(p.startsWith(os.homedir())).toBe(true)
+  })
+
+  it('is different from the global lockfile path', () => {
+    const configPath = getGlobalConfigPath()
+    const lockfilePath = getGlobalLockfilePath()
+    expect(configPath).not.toBe(lockfilePath)
   })
 })

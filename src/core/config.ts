@@ -57,7 +57,36 @@ export function parseRegistryUrl(url: string): { org: string; repo: string } {
   return { org: match[1]!, repo: match[2]! }
 }
 
-/** Read the project config from .asdm.json */
+/** Validate fields and registry URL on a parsed config object */
+function validateProjectConfig(config: ProjectConfig, label: string): void {
+  if (!config.registry) {
+    throw new ConfigError(`Missing required field 'registry' in ${label}`)
+  }
+  if (!config.profile) {
+    throw new ConfigError(`Missing required field 'profile' in ${label}`)
+  }
+  parseRegistryUrl(config.registry)
+}
+
+/**
+ * Read the project config from a full file path.
+ * Use this when the config path is resolved externally (e.g. global config fallback).
+ */
+export async function readProjectConfigFromPath(filePath: string): Promise<ProjectConfig> {
+  const config = await readJson<ProjectConfig>(filePath)
+
+  if (!config) {
+    throw new ConfigError(
+      `No config found at ${filePath}`,
+      'Run `asdm init` to initialize'
+    )
+  }
+
+  validateProjectConfig(config, path.basename(filePath))
+  return config
+}
+
+/** Read the project config from .asdm.json in the given directory */
 export async function readProjectConfig(cwd: string): Promise<ProjectConfig> {
   const filePath = path.join(cwd, PROJECT_CONFIG_FILE)
   const config = await readJson<ProjectConfig>(filePath)
@@ -69,16 +98,7 @@ export async function readProjectConfig(cwd: string): Promise<ProjectConfig> {
     )
   }
 
-  if (!config.registry) {
-    throw new ConfigError(`Missing required field 'registry' in ${PROJECT_CONFIG_FILE}`)
-  }
-  if (!config.profile) {
-    throw new ConfigError(`Missing required field 'profile' in ${PROJECT_CONFIG_FILE}`)
-  }
-
-  // Validate registry URL format
-  parseRegistryUrl(config.registry)
-
+  validateProjectConfig(config, PROJECT_CONFIG_FILE)
   return config
 }
 
@@ -138,6 +158,25 @@ export function resolveConfig(
 }
 
 /**
+ * Write a ProjectConfig to an explicit file path.
+ * Used by `asdm init --global` to write to ~/.config/asdm/config.json.
+ */
+export async function createProjectConfigAtPath(
+  filePath: string,
+  registry: string,
+  profile: string,
+  providers: Array<'opencode' | 'claude-code' | 'copilot'> = ['opencode']
+): Promise<void> {
+  const config: ProjectConfig = {
+    $schema: 'https://asdm.dev/schemas/config.schema.json',
+    registry,
+    profile,
+    providers,
+  }
+  await writeJson(filePath, config)
+}
+
+/**
  * Create a default .asdm.json for `asdm init`
  */
 export async function createProjectConfig(
@@ -147,11 +186,5 @@ export async function createProjectConfig(
   providers: Array<'opencode' | 'claude-code' | 'copilot'> = ['opencode']
 ): Promise<void> {
   const filePath = path.join(cwd, PROJECT_CONFIG_FILE)
-  const config: ProjectConfig = {
-    $schema: 'https://asdm.dev/schemas/config.schema.json',
-    registry,
-    profile,
-    providers,
-  }
-  await writeJson(filePath, config)
+  await createProjectConfigAtPath(filePath, registry, profile, providers)
 }

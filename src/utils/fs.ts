@@ -20,7 +20,11 @@ export async function ensureDir(dirPath: string): Promise<void> {
 /** Write a file, creating parent directories as needed */
 export async function writeFile(filePath: string, content: string | Buffer): Promise<void> {
   await ensureDir(path.dirname(filePath))
-  await fs.writeFile(filePath, content, 'utf-8')
+  if (typeof content === 'string') {
+    await fs.writeFile(filePath, content, 'utf-8')
+  } else {
+    await fs.writeFile(filePath, content)
+  }
 }
 
 /** Read a file as UTF-8 string, returns null if not found */
@@ -108,12 +112,26 @@ export function resolveGlobalEmitPath(relativePath: string, provider: string): s
   if (!prefix || !globalDir) return null
   if (!relativePath.startsWith(prefix)) return null
   const stripped = relativePath.slice(prefix.length)
-  return path.join(globalDir, stripped)
+  const resolved = path.resolve(globalDir, stripped)
+  // Guard against path traversal (e.g. "../../../etc/passwd" in stripped)
+  const safeBase = path.resolve(globalDir) + path.sep
+  if (!resolved.startsWith(safeBase)) return null
+  return resolved
 }
 
 /** Path of the global ASDM lockfile: ~/.config/asdm/global-lock.json */
 export function getGlobalLockfilePath(): string {
   return path.join(getAsdmConfigDir(), 'global-lock.json')
+}
+
+/** Path of the global ASDM config: ~/.config/asdm/config.json */
+export function getGlobalConfigPath(): string {
+  return path.join(getAsdmConfigDir(), 'config.json')
+}
+
+/** Check if a file exists (alias for `exists`) */
+export async function fileExists(filePath: string): Promise<boolean> {
+  return exists(filePath)
 }
 
 /** Get ASDM cache directory: ~/.cache/asdm */

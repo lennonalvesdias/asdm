@@ -15,12 +15,13 @@
 # 1. Install globally (or use npx for zero-install)
 npm install -g asdm-cli
 
-# 2. Initialize your project
-asdm init --registry github://your-org/asdm-registry --profile fullstack-engineer
+# Project Setup (per repository)
+asdm init           # creates .asdm.json
+asdm sync           # installs to project-local provider dirs
 
-# 3. Sync agents, skills, and commands from the registry
-asdm sync           # project-local (inside current directory)
-asdm sync --global  # install to global provider config dirs
+# Machine Setup (no project needed)
+asdm init --global  # creates ~/.config/asdm/config.json
+asdm sync --global  # installs to global provider config dirs
 ```
 
 That's it. ASDM will download your team's canonical AI assistant configurations and emit them into the correct locations for every provider your project uses — OpenCode, Claude Code, and GitHub Copilot — all from a single command.
@@ -98,13 +99,15 @@ asdm init fullstack-engineer                               # specify profile pos
 asdm init --profile data-analytics --registry github://acme/asdm-registry
 asdm init --force                                          # overwrite existing config
 asdm init --gitignore                                      # also update .gitignore
+asdm init --global                                         # write to ~/.config/asdm/config.json
 ```
 
 | Option | Description |
 |--------|-------------|
 | `--registry <url>` | Registry URL in `github://org/repo` format |
-| `--force` | Overwrite existing `.asdm.json` |
-| `--gitignore` | Add ASDM output dirs to `.gitignore` automatically |
+| `--force` | Overwrite existing config |
+| `--gitignore` | Add ASDM output dirs to `.gitignore` automatically (local only) |
+| `--global` | Write to `~/.config/asdm/config.json` instead of `.asdm.json` |
 
 ---
 
@@ -262,6 +265,8 @@ asdm clean                             # remove all managed files + lockfile
 asdm clean --target opencode           # only clean OpenCode files
 asdm clean --target claude-code        # only clean Claude Code files
 asdm clean --dry-run                   # preview what would be removed
+asdm clean --global                    # remove all globally managed files
+asdm clean --global --target opencode  # only clean OpenCode global files
 ```
 
 When run interactively (TTY), you will be prompted to confirm before any files are deleted. After cleaning, a summary shows how many files were removed and how much disk space was freed.
@@ -270,6 +275,7 @@ When run interactively (TTY), you will be prompted to confirm before any files a
 |--------|-------------|
 | `--dry-run` | Preview what would be removed without deleting |
 | `--target <provider>` | Only clean files for a specific provider |
+| `--global` | Clean globally managed files (reads `~/.config/asdm/global-lock.json`) |
 
 ---
 
@@ -355,6 +361,21 @@ Created automatically by `asdm use <profile>`. Never edit this manually.
   "profile": "mobile"
 }
 ```
+
+### `~/.config/asdm/config.json` — Global config
+
+Created by `asdm init --global`. Stores registry, profile, and provider settings for machine-wide installation. Uses the same schema as `.asdm.json`.
+
+```json
+{
+  "$schema": "https://asdm.dev/schemas/config.schema.json",
+  "registry": "github://lennonalvesdias/asdm",
+  "profile": "base",
+  "providers": ["opencode"]
+}
+```
+
+> **Note:** This file is the fallback config source when running `asdm sync --global` or `asdm verify --global` outside of a project directory.
 
 ### `.asdm-lock.json` — Lockfile (committed to git)
 
@@ -566,9 +587,11 @@ ASDM emits files in each provider's native format. You never write provider-spec
 Use `asdm sync --global` to install agents, skills, and commands into the global config directories of each provider. This makes your AI assistant configuration available in **every project** without per-project setup.
 
 ```bash
-asdm init                # initialize once (uses github://lennonalvesdias/asdm by default)
-asdm sync --global       # install to global provider dirs
-asdm verify --global     # verify global installation integrity
+# First-time machine setup (no project needed):
+asdm init --global   # creates ~/.config/asdm/config.json
+asdm sync --global   # installs to global provider dirs
+asdm verify --global # verify global installation
+asdm clean --global  # remove global installation (when needed)
 ```
 
 ### Global config directories
@@ -591,6 +614,16 @@ In global mode, ASDM strips the provider-specific prefix from each file path and
 Project-root files (`AGENTS.md`, `CLAUDE.md`) are skipped in global mode — they have no meaningful global equivalent.
 
 The global lockfile is stored at `~/.config/asdm/global-lock.json`, separate from any project's `.asdm-lock.json`.
+
+### Config resolution
+
+The `--global` flag controls **where files are written** (global provider dirs vs project-local). The config source for `sync` and `verify` with `--global` is resolved in this order:
+
+1. Local `.asdm.json` in the current directory (if present)
+2. `~/.config/asdm/config.json` (fallback — created by `asdm init --global`)
+3. Error: *"No config found. Run `asdm init` (project) or `asdm init --global` (machine-wide setup)."*
+
+This means you can run `asdm sync --global` from any directory — it will use the project config if you're inside a project, or fall back to your global config automatically.
 
 ---
 
