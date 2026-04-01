@@ -33,6 +33,10 @@
   },
   "keywords": ["ai", "agents", "skills", "governance", "cli", "opencode", "claude", "copilot"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lennonalvesdias/asdm"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
