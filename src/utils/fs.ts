@@ -77,6 +77,45 @@ export function getAsdmConfigDir(): string {
   return path.join(os.homedir(), '.config', 'asdm')
 }
 
+/** Maps provider name → global config directory (platform-aware) */
+const PROVIDER_GLOBAL_DIRS: Record<string, string> = {
+  opencode: process.platform === 'win32'
+    ? path.join(os.homedir(), 'AppData', 'Roaming', 'opencode')
+    : path.join(os.homedir(), '.config', 'opencode'),
+  'claude-code': process.platform === 'win32'
+    ? path.join(os.homedir(), 'AppData', 'Roaming', 'Claude')
+    : path.join(os.homedir(), '.claude'),
+  copilot: process.platform === 'win32'
+    ? path.join(os.homedir(), 'AppData', 'Roaming', 'GitHub Copilot')
+    : path.join(os.homedir(), '.config', 'github-copilot'),
+}
+
+/** Maps provider name → emitted path prefix (e.g. ".opencode/") */
+const PROVIDER_PATH_PREFIXES: Record<string, string> = {
+  opencode: '.opencode/',
+  'claude-code': '.claude/',
+  copilot: '.github/',
+}
+
+/**
+ * Resolve a relative emitted path to its global provider config directory.
+ * Returns null when the path has no provider prefix (project-root files) or
+ * the provider is unknown — callers must skip those files in global mode.
+ */
+export function resolveGlobalEmitPath(relativePath: string, provider: string): string | null {
+  const prefix = PROVIDER_PATH_PREFIXES[provider]
+  const globalDir = PROVIDER_GLOBAL_DIRS[provider]
+  if (!prefix || !globalDir) return null
+  if (!relativePath.startsWith(prefix)) return null
+  const stripped = relativePath.slice(prefix.length)
+  return path.join(globalDir, stripped)
+}
+
+/** Path of the global ASDM lockfile: ~/.config/asdm/global-lock.json */
+export function getGlobalLockfilePath(): string {
+  return path.join(getAsdmConfigDir(), 'global-lock.json')
+}
+
 /** Get ASDM cache directory: ~/.cache/asdm */
 export function getAsdmCacheDir(): string {
   const xdgCache = process.env['XDG_CACHE_HOME']

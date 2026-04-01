@@ -35,26 +35,26 @@ export interface AsdmLockfile {
   files: Record<string, LockfileEntry>
 }
 
-const LOCKFILE_NAME = '.asdm-lock.json'
+export const LOCKFILE_FILENAME = '.asdm-lock.json'
 
-/** Read the lockfile from the project root */
-export async function readLockfile(cwd: string): Promise<AsdmLockfile | null> {
-  const filePath = path.join(cwd, LOCKFILE_NAME)
+/** Read the lockfile from the project root, or from an explicit path when provided */
+export async function readLockfile(cwd: string, lockfilePath?: string): Promise<AsdmLockfile | null> {
+  const filePath = lockfilePath ?? path.join(cwd, LOCKFILE_FILENAME)
   return readJson<AsdmLockfile>(filePath)
 }
 
-/** Write the lockfile to the project root */
-export async function writeLockfile(cwd: string, lockfile: AsdmLockfile): Promise<void> {
-  const filePath = path.join(cwd, LOCKFILE_NAME)
+/** Write the lockfile to the project root, or to an explicit path when provided */
+export async function writeLockfile(cwd: string, lockfile: AsdmLockfile, lockfilePath?: string): Promise<void> {
+  const filePath = lockfilePath ?? path.join(cwd, LOCKFILE_FILENAME)
   await writeJson(filePath, {
     $schema: 'https://asdm.dev/schemas/lock.schema.json',
     ...lockfile,
   })
 }
 
-/** Check if a lockfile exists */
-export async function lockfileExists(cwd: string): Promise<boolean> {
-  return exists(path.join(cwd, LOCKFILE_NAME))
+/** Check if a lockfile exists at the project root, or at an explicit path when provided */
+export async function lockfileExists(cwd: string, lockfilePath?: string): Promise<boolean> {
+  return exists(lockfilePath ?? path.join(cwd, LOCKFILE_FILENAME))
 }
 
 /**

@@ -15,6 +15,7 @@ import { defineCommand } from 'citty'
 import { verify, VERIFY_EXIT_CODES } from '../../core/verifier.js'
 import { TelemetryWriter } from '../../core/telemetry.js'
 import { logger } from '../../utils/logger.js'
+import { getGlobalLockfilePath } from '../../utils/fs.js'
 
 export default defineCommand({
   meta: {
@@ -37,6 +38,11 @@ export default defineCommand({
       description: 'Suppress non-error output',
       default: false,
     },
+    global: {
+      type: 'boolean',
+      description: 'Verify files installed to global provider config directories',
+      default: false,
+    },
   },
   async run(ctx) {
     const cwd = process.cwd()
@@ -46,9 +52,10 @@ export default defineCommand({
     if (quiet) logger.setQuiet(true)
 
     const telemetry = new TelemetryWriter(cwd)
+    const lockfilePath = ctx.args.global ? getGlobalLockfilePath() : undefined
 
     if (ctx.args.strict) {
-      const result = await verify(cwd, undefined, true, telemetry)
+      const result = await verify(cwd, undefined, true, telemetry, lockfilePath)
       if (useJson) {
         console.log(JSON.stringify({
           status: result.exitCode === VERIFY_EXIT_CODES.OK ? 'ok' : 'error',
@@ -67,7 +74,7 @@ export default defineCommand({
     }
 
     try {
-      const result = await verify(cwd, undefined, true, telemetry)
+      const result = await verify(cwd, undefined, true, telemetry, lockfilePath)
 
       if (useJson) {
         console.log(JSON.stringify(result, null, 2))
@@ -76,8 +83,8 @@ export default defineCommand({
       }
 
       if (result.exitCode === VERIFY_EXIT_CODES.NO_LOCK) {
-        logger.warn('No lockfile found (.asdm-lock.json)')
-        logger.info('Run `asdm sync` to initialize')
+        logger.warn(lockfilePath ? 'No global lockfile found' : 'No lockfile found (.asdm-lock.json)')
+        logger.info(lockfilePath ? 'Run `asdm sync --global` to initialize' : 'Run `asdm sync` to initialize')
         process.exitCode = VERIFY_EXIT_CODES.NO_LOCK
         return
       }

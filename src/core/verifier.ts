@@ -14,7 +14,7 @@
 import path from 'node:path'
 import { readLockfile } from './lockfile.js'
 import { hashFile } from './hash.js'
-import { exists } from '../utils/fs.js'
+import { exists, resolveGlobalEmitPath } from '../utils/fs.js'
 import { IntegrityError } from '../utils/errors.js'
 import type { TelemetryWriter } from './telemetry.js'
 
@@ -51,14 +51,17 @@ export interface VerifyResult {
  * @param latestManifestVersion - If provided, compare against local to detect outdated (exit code 3)
  * @param onlyManaged - If true, only check files with managed=true in lockfile
  * @param telemetry - Optional writer for local telemetry events
+ * @param lockfilePath - Explicit lockfile path override (used by `verify --global`)
  */
 export async function verify(
   cwd: string,
   latestManifestVersion?: string,
   onlyManaged = true,
-  telemetry?: TelemetryWriter
+  telemetry?: TelemetryWriter,
+  lockfilePath?: string,
 ): Promise<VerifyResult> {
-  const lockfile = await readLockfile(cwd)
+  const lockfile = await readLockfile(cwd, lockfilePath)
+  const isGlobal = lockfilePath !== undefined
   
   if (!lockfile) {
     telemetry?.write({ event: 'verify.failed' }).catch(() => {})
@@ -77,7 +80,11 @@ export async function verify(
     : Object.entries(lockfile.files)
   
   for (const [relativePath, entry] of filesToCheck) {
-    const absolutePath = path.join(cwd, relativePath)
+    // In global mode resolve against the provider's global config dir;
+    // fall back to cwd-relative for any unrecognised path.
+    const absolutePath = isGlobal
+      ? (resolveGlobalEmitPath(relativePath, entry.adapter) ?? path.join(cwd, relativePath))
+      : path.join(cwd, relativePath)
     checkedFiles++
     
     const fileExists = await exists(absolutePath)

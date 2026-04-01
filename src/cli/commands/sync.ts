@@ -35,6 +35,11 @@ export default defineCommand({
       type: 'string',
       description: 'Sync only for a specific provider',
     },
+    global: {
+      type: 'boolean',
+      description: 'Install to global provider config directories instead of project-local folders',
+      default: false,
+    },
   },
   async run(ctx) {
     const cwd = process.cwd()
@@ -58,6 +63,7 @@ export default defineCommand({
         dryRun,
         verbose,
         provider: ctx.args.provider,
+        global: ctx.args.global ?? false,
         telemetry,
       })
 

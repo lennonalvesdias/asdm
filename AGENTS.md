@@ -62,6 +62,8 @@ tests/
 ├── unit/           # Unit tests mirroring src/ structure
 ├── integration/    # Integration tests
 └── fixtures/       # Test data (agents, profiles, manifests, lockfiles)
+
+~/.config/asdm/global-lock.json  # global lockfile (created by `asdm sync --global`)
 ```
 
 ---
@@ -231,3 +233,4 @@ describe('ModuleName', () => {
 - **Managed file headers**: All emitted files must include `managedFileHeader(adapterName)` from `src/adapters/base.ts`. This is how `verify` and `clean` identify managed files.
 - **SHA-256 integrity**: Every synced asset is hashed and stored in `.asdm-lock.json`. Always verify after download; never trust the manifest hash alone.
 - **Telemetry is optional**: All `telemetry?.write(…)` calls use optional chaining and `.catch(() => {})`. Telemetry outages must never surface to the user.
+- **Global mode**: `asdm sync --global` writes to provider global config dirs; lockfile at `~/.config/asdm/global-lock.json`; project-root files (`AGENTS.md`, `CLAUDE.md`) are skipped.

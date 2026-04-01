@@ -21,7 +21,7 @@ import { resolveProfileFromManifest } from './profile-resolver.js'
 import { getProfileAssetPaths, diffManifest } from './manifest.js'
 import { readLockfile, buildLockfile, writeLockfile, createLockEntry } from './lockfile.js'
 import { hashString } from './hash.js'
-import { writeFile, ensureDir, getAsdmCacheDir } from '../utils/fs.js'
+import { writeFile, ensureDir, getAsdmCacheDir, resolveGlobalEmitPath, getGlobalLockfilePath } from '../utils/fs.js'
 import { IntegrityError } from '../utils/errors.js'
 import type { EmitAdapter, EmittedFile } from '../adapters/base.js'
 import type { ParsedAsset } from './parser.js'
@@ -34,6 +34,7 @@ export interface SyncOptions {
   dryRun?: boolean        // Show what would be done, don't write
   noEmit?: boolean        // Download assets but don't emit to providers
   provider?: string       // Sync only for this provider
+  global?: boolean        // Install to global provider config dirs instead of project-local
   verbose?: boolean
   quiet?: boolean
   telemetry?: TelemetryWriter
@@ -129,7 +130,8 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
     )
     
     // Step 7: Read existing lockfile for incremental sync
-    const existingLockfile = options.force ? null : await readLockfile(cwd)
+    const lockfilePath = options.global ? getGlobalLockfilePath() : undefined
+    const existingLockfile = options.force ? null : await readLockfile(cwd, lockfilePath)
     
     // Build local sha map from lockfile (source asset paths → sha256)
     const localSourceShas: Record<string, string> = {}
@@ -261,8 +263,21 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
     }
     
     // Step 11: Write emitted files to disk
+    // In global mode, strip provider prefix and write to provider's global config dir.
+    // Pre-compute resolved absolute paths; entries with a null path (project-root files) are skipped.
+    const resolvedPaths = new Map<string, string>()
     for (const emittedFile of allEmittedFiles) {
-      const absolutePath = path.join(cwd, emittedFile.relativePath)
+      const absolutePath: string | null = options.global
+        ? resolveGlobalEmitPath(emittedFile.relativePath, emittedFile.adapter)
+        : path.join(cwd, emittedFile.relativePath)
+      if (absolutePath !== null) {
+        resolvedPaths.set(emittedFile.relativePath, absolutePath)
+      }
+    }
+
+    for (const emittedFile of allEmittedFiles) {
+      const absolutePath = resolvedPaths.get(emittedFile.relativePath)
+      if (absolutePath === undefined) continue
       await writeFile(absolutePath, emittedFile.content as string)
     }
     
@@ -270,6 +285,7 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
     const lockfileFiles: Record<string, ReturnType<typeof createLockEntry>> = {}
     
     for (const emittedFile of allEmittedFiles) {
+      if (!resolvedPaths.has(emittedFile.relativePath)) continue
       lockfileFiles[emittedFile.relativePath] = createLockEntry(
         emittedFile.sha256,
         emittedFile.sourcePath,
@@ -288,7 +304,7 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
       files: lockfileFiles,
     })
     
-    await writeLockfile(cwd, lockfile)
+    await writeLockfile(cwd, lockfile, lockfilePath)
     
     const stats: SyncStats = {
       filesAdded: diff.added.length,
