@@ -17,7 +17,7 @@ import { createProjectConfig } from '../../core/config.js'
 import { TelemetryWriter } from '../../core/telemetry.js'
 import { logger } from '../../utils/logger.js'
 
-const DEFAULT_REGISTRY = 'github://your-org/asdm-registry'
+const DEFAULT_REGISTRY = 'github://lennonalvesdias/asdm'
 
 export default defineCommand({
   meta: {

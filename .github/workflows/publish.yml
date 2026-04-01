@@ -9,7 +9,7 @@ jobs:
     name: Publish to npm
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write   # needed to upload release assets
       id-token: write   # for npm provenance
     steps:
       - uses: actions/checkout@v4
@@ -29,3 +29,7 @@ jobs:
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Upload registry manifest
+        run: gh release upload ${{ github.ref_name }} registry/latest.json#manifest.json --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
