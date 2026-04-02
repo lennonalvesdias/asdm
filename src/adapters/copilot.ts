@@ -6,7 +6,7 @@
  * Emission mapping:
  *   Agent   → .github/agents/{name}.agent.md (with YAML frontmatter)
  *   Skill   → .github/skills/{name}/SKILL.md
- *   Command → (none; aggregated into .github/copilot-instructions.md)
+ *   Command → .github/skills/{name}/SKILL.md (as a Copilot skill / CLI slash command)
  *   Root    → .github/copilot-instructions.md (agents + commands + skills summary)
  *   Config  → (none)
  */
@@ -30,12 +30,32 @@ function formatAgentContent(parsed: ParsedAsset): string {
     '',
   ].join('\n')
 
-  return [managedFileHeader(ADAPTER_NAME), '', frontmatter, parsed.body].join('\n')
+  return [frontmatter, '', managedFileHeader(ADAPTER_NAME), '', parsed.body].join('\n')
+}
+
+/** Format a command as a Copilot SKILL.md file (slash-command equivalent for CLI) */
+function formatCommandAsSkill(parsed: ParsedAsset): string {
+  const frontmatter = [
+    '---',
+    `name: ${parsed.name}`,
+    `description: ${parsed.description}`,
+    '---',
+    '',
+  ].join('\n')
+
+  return [frontmatter, '', managedFileHeader(ADAPTER_NAME), '', parsed.body].join('\n')
 }
 
 /** Format a skill as a Copilot SKILL.md file */
 function formatSkillContent(parsed: ParsedAsset): string {
-  return [managedFileHeader(ADAPTER_NAME), '', parsed.body].join('\n')
+  const frontmatter = [
+    '---',
+    `name: ${parsed.name}`,
+    `description: ${parsed.description}`,
+    '---',
+  ].join('\n')
+
+  return [frontmatter, '', managedFileHeader(ADAPTER_NAME), '', parsed.body].join('\n')
 }
 
 /** Generate .github/copilot-instructions.md aggregating agents, commands, and skills */
@@ -57,8 +77,10 @@ function generateCopilotInstructions(profile: ResolvedProfile): string {
 
   if (profile.commands.length > 0) {
     lines.push('## Commands Available', '')
+    lines.push('The following commands are available as Copilot skills.')
+    lines.push('Invoke with `/command-name` or describe the task naturally.', '')
     for (const cmd of profile.commands) {
-      lines.push(`- **${cmd}**`)
+      lines.push(`- **${cmd}**: See \`.github/skills/${cmd}/SKILL.md\``)
     }
     lines.push('')
   }
@@ -90,10 +112,14 @@ export class CopilotAdapter implements EmitAdapter {
     return [createEmittedFile(relativePath, content, ADAPTER_NAME, parsed.sourcePath)]
   }
 
-  emitCommand(_parsed: ParsedAsset, _targetDir: string): EmittedFile[] {
-    // Copilot commands are aggregated into copilot-instructions.md via
-    // emitRootInstructions — no individual command files are written.
-    return []
+  emitCommand(parsed: ParsedAsset, _targetDir: string): EmittedFile[] {
+    // NOTE: Copilot has no native commands directory. Commands are mapped to the
+    // skills namespace (.github/skills/) so they are invocable as /command-name
+    // in Copilot CLI. If a skill and a command share the same name, the command
+    // takes precedence (syncer emits skills before commands, so command overwrites).
+    const relativePath = `.github/skills/${parsed.name}/SKILL.md`
+    const content = formatCommandAsSkill(parsed)
+    return [createEmittedFile(relativePath, content, ADAPTER_NAME, parsed.sourcePath)]
   }
 
   emitRootInstructions(profile: ResolvedProfile, _targetDir: string): EmittedFile[] {

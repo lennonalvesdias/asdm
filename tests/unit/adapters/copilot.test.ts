@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
-import { createCopilotAdapter } from '../../../src/adapters/copilot.js'
+import { createCopilotAdapter, CopilotAdapter } from '../../../src/adapters/copilot.js'
 import type { ParsedAsset } from '../../../src/core/parser.js'
 import type { ResolvedProfile } from '../../../src/core/profile-resolver.js'
 
@@ -78,6 +78,12 @@ describe('CopilotAdapter', () => {
       expect(content).toContain('---')
     })
 
+    it('starts with --- on line 1 (frontmatter before managed header)', () => {
+      const files = adapter.emitAgent(SAMPLE_AGENT, '/project')
+      const content = files[0]?.content as string
+      expect(content.startsWith('---')).toBe(true)
+    })
+
     it('includes agent body content', () => {
       const files = adapter.emitAgent(SAMPLE_AGENT, '/project')
       expect(files[0]?.content).toContain('Code Reviewer')
@@ -117,6 +123,27 @@ describe('CopilotAdapter', () => {
       expect(files[0]?.content).toContain('React Best Practices')
     })
 
+    it('includes YAML frontmatter with name', () => {
+      const files = adapter.emitSkill(SAMPLE_SKILL, '/project')
+      expect(files[0]?.content).toContain('name: react-best-practices')
+    })
+
+    it('includes YAML frontmatter with description', () => {
+      const files = adapter.emitSkill(SAMPLE_SKILL, '/project')
+      expect(files[0]?.content).toContain('description: React best practices for the company')
+    })
+
+    it('wraps frontmatter in --- delimiters', () => {
+      const files = adapter.emitSkill(SAMPLE_SKILL, '/project')
+      expect(files[0]?.content).toContain('---')
+    })
+
+    it('starts with --- on line 1 (frontmatter before managed header)', () => {
+      const files = adapter.emitSkill(SAMPLE_SKILL, '/project')
+      const content = files[0]?.content as string
+      expect(content.startsWith('---')).toBe(true)
+    })
+
     it('includes managed-file header', () => {
       const files = adapter.emitSkill(SAMPLE_SKILL, '/project')
       expect(files[0]?.content).toContain('ASDM MANAGED FILE')
@@ -129,9 +156,46 @@ describe('CopilotAdapter', () => {
   })
 
   describe('emitCommand', () => {
-    it('returns empty array (commands are aggregated in copilot-instructions.md)', () => {
+    it('emits exactly one file', () => {
       const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
-      expect(files).toHaveLength(0)
+      expect(files).toHaveLength(1)
+    })
+
+    it('writes to .github/skills/{name}/SKILL.md', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      expect(files[0]?.relativePath).toBe('.github/skills/review/SKILL.md')
+    })
+
+    it('includes YAML frontmatter with name and description', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      expect(files[0]?.content).toContain('name: review')
+      expect(files[0]?.content).toContain('description: Inicia uma revisão de código no branch atual')
+    })
+
+    it('includes managed-file header', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      expect(files[0]?.content).toContain('ASDM MANAGED FILE')
+    })
+
+    it('includes the command body', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      expect(files[0]?.content).toContain('Executa uma revisão completa.')
+    })
+
+    it('starts with --- on line 1 (frontmatter before managed header)', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      const content = files[0]?.content as string
+      expect(content.startsWith('---')).toBe(true)
+    })
+
+    it('sets the correct adapter name', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      expect(files[0]?.adapter).toBe('copilot')
+    })
+
+    it('sets sourcePath from parsed asset', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      expect(files[0]?.sourcePath).toBe('commands/review.asdm.md')
     })
   })
 
@@ -292,5 +356,64 @@ describe('CopilotAdapter', () => {
 
       expect(removed).toHaveLength(3)
     })
+  })
+})
+
+const makeAsset = (overrides: Partial<ParsedAsset> = {}): ParsedAsset => ({
+  name: 'audit-deps',
+  description: 'Audits project dependencies for security vulnerabilities',
+  body: 'Run npm audit and report critical vulnerabilities.',
+  type: 'command',
+  version: '1.0.0',
+  sourcePath: 'commands/audit-deps.asdm.md',
+  frontmatter: {},
+  providerConfig: {},
+  sha256: 'a'.repeat(64),
+  ...overrides,
+})
+
+describe('CopilotAdapter.emitCommand', () => {
+  const adapter = new CopilotAdapter()
+
+  it('emits exactly one file', () => {
+    const files = adapter.emitCommand(makeAsset(), '/tmp')
+    expect(files).toHaveLength(1)
+  })
+
+  it('writes to .github/skills/{name}/SKILL.md', () => {
+    const files = adapter.emitCommand(makeAsset(), '/tmp')
+    expect(files[0]?.relativePath).toBe('.github/skills/audit-deps/SKILL.md')
+  })
+
+  it('includes YAML frontmatter with name and description', () => {
+    const files = adapter.emitCommand(makeAsset(), '/tmp')
+    expect(files[0]?.content).toContain('name: audit-deps')
+    expect(files[0]?.content).toContain('description: Audits project dependencies for security vulnerabilities')
+  })
+
+  it('includes managedFileHeader', () => {
+    const files = adapter.emitCommand(makeAsset(), '/tmp')
+    expect(files[0]?.content).toContain('ASDM MANAGED FILE')
+  })
+
+  it('includes the command body', () => {
+    const files = adapter.emitCommand(makeAsset(), '/tmp')
+    expect(files[0]?.content).toContain('Run npm audit and report critical vulnerabilities.')
+  })
+
+  it('sets the correct adapter name', () => {
+    const files = adapter.emitCommand(makeAsset(), '/tmp')
+    expect(files[0]?.adapter).toBe('copilot')
+  })
+
+  it('uses name from asset for path', () => {
+    const files = adapter.emitCommand(makeAsset({ name: 'analyze-schema' }), '/tmp')
+    expect(files[0]?.relativePath).toBe('.github/skills/analyze-schema/SKILL.md')
+  })
+
+  it('starts with --- on line 1 (frontmatter before managed header)', () => {
+    const files = adapter.emitCommand(makeAsset(), '/tmp')
+    const content = files[0]?.content as string
+    expect(content.startsWith('---')).toBe(true)
   })
 })
