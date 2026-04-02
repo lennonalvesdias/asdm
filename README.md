@@ -312,7 +312,7 @@ asdm gitignore
 Adds a clearly-marked ASDM block to `.gitignore` that covers:
 - `.opencode/agents/`, `.opencode/skills/`, `.opencode/commands/`
 - `.claude/agents/`, `.claude/skills/`
-- `.github/agents/`
+- `.github/agents/`, `.github/skills/`
 - `.asdm.local.json` (developer profile override)
 
 ---
@@ -575,9 +575,9 @@ ASDM emits files in each provider's native format. You never write provider-spec
 
 | Asset Type | Output Location |
 |------------|-----------------|
-| Agent | `.github/agents/{name}.agent.md` (YAML frontmatter) |
-| Skill | `.github/instructions/{name}.instructions.md` |
-| Command | `.github/instructions/{name}.instructions.md` |
+| Agent | `.github/agents/{name}.agent.md` (with YAML frontmatter) |
+| Skill | `.github/skills/{name}/SKILL.md` |
+| Command | `.github/skills/{name}/SKILL.md` (invocable as `/command-name` in Copilot CLI) |
 | Root instructions | `.github/copilot-instructions.md` |
 
 ---
