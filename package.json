@@ -1,6 +1,6 @@
 {
   "name": "asdm-cli",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Agentic Software Delivery Model — CLI for unified AI coding assistant governance",
   "type": "module",
   "bin": {
