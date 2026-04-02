@@ -21,7 +21,7 @@ import { resolveProfileFromManifest } from './profile-resolver.js'
 import { getProfileAssetPaths, diffManifest } from './manifest.js'
 import { readLockfile, buildLockfile, writeLockfile, createLockEntry } from './lockfile.js'
 import { hashString } from './hash.js'
-import { writeFile, readFile, ensureDir, getAsdmCacheDir, resolveGlobalEmitPath, getGlobalLockfilePath } from '../utils/fs.js'
+import { writeFile, readFile, listFiles, ensureDir, getAsdmCacheDir, resolveGlobalEmitPath, getGlobalLockfilePath, removeFile } from '../utils/fs.js'
 import { IntegrityError } from '../utils/errors.js'
 import type { EmitAdapter, EmittedFile } from '../adapters/base.js'
 import type { ParsedAsset } from './parser.js'
@@ -36,6 +36,7 @@ export interface SyncOptions {
   noEmit?: boolean        // Download assets but don't emit to providers
   provider?: string       // Sync only for this provider
   global?: boolean        // Install to global provider config dirs instead of project-local
+  clean?: boolean         // Remove managed files from previous profile that are no longer needed
   verbose?: boolean
   quiet?: boolean
   telemetry?: TelemetryWriter
@@ -56,6 +57,35 @@ export interface SyncResult {
   stats: SyncStats
   emittedFiles: EmittedFile[]
   dryRun: boolean
+}
+
+/** Directories owned by each adapter, for disk-scan orphan detection. */
+const ADAPTER_SCAN_DIRS: Record<string, string[]> = {
+  'opencode': ['.opencode/agents', '.opencode/skills', '.opencode/commands'],
+  'claude-code': ['.claude/agents', '.claude/skills', '.claude/commands'],
+  'copilot': ['.github/agents', '.github/skills'],
+  'agents-dir': ['.agents'],
+}
+
+/**
+ * Walks `dir` recursively and returns absolute paths of files containing the ASDM managed header.
+ * Returns an empty array if the directory does not exist.
+ */
+async function findManagedFilesInDir(dir: string): Promise<string[]> {
+  let allFiles: string[]
+  try {
+    allFiles = await listFiles(dir)
+  } catch {
+    return []  // Directory doesn't exist — skip silently
+  }
+  const result: string[] = []
+  for (const filePath of allFiles) {
+    const content = await readFile(filePath)
+    if (content?.includes('ASDM MANAGED FILE')) {
+      result.push(filePath)
+    }
+  }
+  return result
 }
 
 /** Load the appropriate adapter for each provider */
@@ -136,14 +166,16 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
       resolvedProfile.commands
     )
     
-    // Step 7: Read existing lockfile for incremental sync
+    // Step 7: Read existing lockfile for incremental sync and orphan detection.
+    // Always read unconditionally — even when --force is active — so --clean can
+    // identify orphaned files regardless of whether assets are being force-downloaded.
     const lockfilePath = options.global ? getGlobalLockfilePath() : undefined
-    const existingLockfile = options.force ? null : await readLockfile(cwd, lockfilePath)
+    const existingLockfile = await readLockfile(cwd, lockfilePath)
     
-    // Build local sha map from lockfile (source asset paths → sha256)
+    // Build local sha map from lockfile (source asset paths → sha256).
+    // Skipped when --force so the diff treats all assets as changed and re-downloads them.
     const localSourceShas: Record<string, string> = {}
-    if (existingLockfile) {
-      // Map source asset paths to their expected hashes
+    if (!options.force && existingLockfile) {
       for (const [, entry] of Object.entries(existingLockfile.files)) {
         if (entry.managed && entry.source) {
           localSourceShas[entry.source] = entry.sha256
@@ -199,8 +231,9 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
         // Cache miss — will be re-downloaded next time
       }
     }
-    
-    if (options.dryRun || options.noEmit) {
+
+    // noEmit early return — skip all emit and orphan logic
+    if (options.noEmit) {
       const stats: SyncStats = {
         filesAdded: diff.added.length,
         filesUpdated: diff.updated.length,
@@ -219,10 +252,11 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
         assetCount: 0,
         durationMs: stats.duration,
       }).catch(() => {})
-      return { stats, emittedFiles: [], dryRun: !!options.dryRun }
+      return { stats, emittedFiles: [], dryRun: false }
     }
     
-    // Step 10: Load and run emit adapters
+    // Step 10: Load and run emit adapters.
+    // Runs before the dryRun return so orphan detection can use the emitted-file set.
     const adapters = await loadAdapters(activeProviders)
     const allEmittedFiles: EmittedFile[] = []
     
@@ -267,8 +301,85 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
       const configFiles = adapter.emitConfig(resolvedProfile, cwd)
       allEmittedFiles.push(...configFiles)
     }
-    
-    // Step 11: Write emitted files to disk
+
+    // Step 11: Compute orphans for --clean mode
+    // Phase 1 uses the lockfile; Phase 2 scans disk for ghost files not in lockfile.
+    // Both phases run before the dryRun return so dry-run stats reflect the correct
+    // filesRemoved count when --clean is active.
+    // Only files whose adapter was active in this sync run are considered orphans,
+    // preventing cross-provider clobber when --provider filters to a single adapter.
+    const newRelativePaths = new Set(allEmittedFiles.map(f => f.relativePath))
+    const orphansToDelete: string[] = []  // absolute paths of managed files to remove
+
+    if (options.clean) {
+      const activeAdapterSet = new Set(
+        options.provider ? [options.provider] : activeProviders
+      )
+
+      // Phase 1: lockfile-based orphans (managed files tracked in old lockfile but not in new emit set)
+      if (existingLockfile) {
+        for (const [relPath, entry] of Object.entries(existingLockfile.files)) {
+          if (!entry.managed || !activeAdapterSet.has(entry.adapter)) continue
+          if (newRelativePaths.has(relPath)) continue
+
+          let absPath: string
+          if (options.global) {
+            const p = resolveGlobalEmitPath(relPath, entry.adapter)
+            if (!p) continue
+            absPath = p
+          } else {
+            absPath = path.join(cwd, relPath)
+          }
+          orphansToDelete.push(absPath)
+        }
+      }
+
+      // Phase 2: disk scan for ghost managed files not tracked in lockfile (local mode only).
+      // Catches files left on disk from a previous profile sync that was never --clean'd.
+      if (!options.global) {
+        const orphanAbsPaths = new Set(orphansToDelete)
+        for (const provider of activeProviders) {
+          const scanDirs = ADAPTER_SCAN_DIRS[provider] ?? []
+          for (const scanDir of scanDirs) {
+            const absDir = path.join(cwd, scanDir)
+            const managed = await findManagedFilesInDir(absDir)
+            for (const absFile of managed) {
+              // Normalize to forward-slash relative path for comparison
+              const relPath = path.relative(cwd, absFile).split(path.sep).join('/')
+              if (!newRelativePaths.has(relPath) && !orphanAbsPaths.has(absFile)) {
+                orphansToDelete.push(absFile)
+                orphanAbsPaths.add(absFile)
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // dryRun early return — includes orphan count for accurate --clean reporting
+    if (options.dryRun) {
+      const stats: SyncStats = {
+        filesAdded: diff.added.length,
+        filesUpdated: diff.updated.length,
+        filesUnchanged: diff.unchanged.length,
+        filesRemoved: diff.removed.length + orphansToDelete.length,
+        duration: Date.now() - startTime,
+        manifestVersion: manifest.version,
+        profile: resolvedConfig.profile,
+        providers: activeProviders,
+      }
+      options.telemetry?.write({
+        event: 'sync.completed',
+        profile: resolvedConfig.profile,
+        registry: resolvedConfig.registry,
+        providers: activeProviders,
+        assetCount: 0,
+        durationMs: stats.duration,
+      }).catch(() => {})
+      return { stats, emittedFiles: [], dryRun: true }
+    }
+
+    // Step 12: Write emitted files to disk
     // In global mode, strip provider prefix and write to provider's global config dir.
     // Pre-compute resolved absolute paths; entries with a null path (project-root files) are skipped.
     const resolvedPaths = new Map<string, string>()
@@ -286,8 +397,16 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
       if (absolutePath === undefined) continue
       await writeFile(absolutePath, emittedFile.content)
     }
+
+    // Step 13: Delete orphan files identified in step 11.
+    // removeFile handles ENOENT internally; real errors (EPERM, EACCES) bubble up.
+    let orphanFilesRemoved = 0
+    for (const absPath of orphansToDelete) {
+      await removeFile(absPath)
+      orphanFilesRemoved++
+    }
     
-    // Step 12: Build and write lockfile
+    // Step 14: Build and write lockfile
     const lockfileFiles: Record<string, ReturnType<typeof createLockEntry>> = {}
     
     for (const emittedFile of allEmittedFiles) {
@@ -316,7 +435,7 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
       filesAdded: diff.added.length,
       filesUpdated: diff.updated.length,
       filesUnchanged: diff.unchanged.length,
-      filesRemoved: diff.removed.length,
+      filesRemoved: diff.removed.length + orphanFilesRemoved,
       duration: Date.now() - startTime,
       manifestVersion: manifest.version,
       profile: resolvedConfig.profile,

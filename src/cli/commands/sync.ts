@@ -54,6 +54,11 @@ export default defineCommand({
       description: 'Re-download all assets even if SHA matches',
       default: false,
     },
+    clean: {
+      type: 'boolean',
+      description: 'Remove managed files from previous profile that are no longer in use',
+      default: false,
+    },
     verbose: {
       type: 'boolean',
       description: 'Print verbose output',
@@ -95,6 +100,7 @@ export default defineCommand({
         verbose,
         provider: ctx.args.provider,
         global: ctx.args.global ?? false,
+        clean: ctx.args.clean,
         telemetry,
       })
 
@@ -118,6 +124,7 @@ export default defineCommand({
         ['Files added', String(stats.filesAdded)],
         ['Files updated', String(stats.filesUpdated)],
         ['Files unchanged', String(stats.filesUnchanged)],
+        ['Files removed', String(stats.filesRemoved)],
         ['Duration', `${stats.duration}ms`],
       ])
     } catch (err) {
