@@ -1,6 +1,6 @@
 {
   "$schema": "https://asdm.dev/schemas/manifest.schema.json",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "policy": {
     "locked_fields": [
       "telemetry",
@@ -22,7 +22,7 @@
       "claude-code",
       "copilot"
     ],
-    "min_cli_version": "0.1.4"
+    "min_cli_version": "0.2.0"
   },
   "profiles": {
     "base": {

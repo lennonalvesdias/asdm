@@ -1,6 +1,6 @@
 {
   "name": "asdm-cli",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Agentic Software Delivery Model — CLI for unified AI coding assistant governance",
   "type": "module",
   "bin": {
@@ -31,7 +31,16 @@
     "validate": "tsx scripts/validate.ts",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["ai", "agents", "skills", "governance", "cli", "opencode", "claude", "copilot"],
+  "keywords": [
+    "ai",
+    "agents",
+    "skills",
+    "governance",
+    "cli",
+    "opencode",
+    "claude",
+    "copilot"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
