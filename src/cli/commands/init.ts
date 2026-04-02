@@ -8,6 +8,10 @@
  *   --global      Write config to ~/.config/asdm/config.json instead of .asdm.json.
  *   --gitignore   Automatically add ASDM output dirs to .gitignore after init.
  *   (omitted)     In a TTY, prints a tip to run `asdm gitignore` manually.
+ *
+ * Interactive mode (TTY only):
+ *   Prompts for providers (multi-select) and profile (single-select).
+ *   Falls back to CLI args in CI / non-TTY environments.
  */
 
 import { defineCommand } from 'citty'
@@ -17,8 +21,28 @@ import { updateGitignore } from '../../utils/gitignore.js'
 import { createProjectConfig, createProjectConfigAtPath } from '../../core/config.js'
 import { TelemetryWriter } from '../../core/telemetry.js'
 import { logger } from '../../utils/logger.js'
+import { selectOne, selectMany } from '../../utils/prompt.js'
+
+type Provider = 'opencode' | 'claude-code' | 'copilot' | 'agents-dir'
 
 const DEFAULT_REGISTRY = 'github://lennonalvesdias/asdm'
+
+const DEFAULT_PROVIDERS: Provider[] = ['opencode']
+
+const PROVIDER_OPTIONS: Array<{ label: string; value: Provider }> = [
+  { label: 'opencode    — OpenCode IDE integration (.opencode/)', value: 'opencode' },
+  { label: 'claude-code — Claude Code IDE integration (.claude/)', value: 'claude-code' },
+  { label: 'copilot     — GitHub Copilot integration (.github/)', value: 'copilot' },
+  { label: 'agents-dir  — Cross-provider agents directory (.agents/)', value: 'agents-dir' },
+]
+
+const PROFILE_OPTIONS: Array<{ label: string; value: string }> = [
+  { label: 'base               — Base configuration with common agents and skills', value: 'base' },
+  { label: 'data-analytics     — Data analysis, SQL, pandas, and reporting', value: 'data-analytics' },
+  { label: 'fullstack-engineer — Full-stack web development', value: 'fullstack-engineer' },
+  { label: 'mobile             — Mobile development (iOS + Android)', value: 'mobile' },
+  { label: 'security           — Security auditing and threat modeling', value: 'security' },
+]
 
 export default defineCommand({
   meta: {
@@ -55,9 +79,26 @@ export default defineCommand({
   },
   async run(ctx) {
     const cwd = process.cwd()
-    const profile = ctx.args.profile || 'base'
     const registry = ctx.args.registry || DEFAULT_REGISTRY
-    const providers: Array<'opencode' | 'claude-code' | 'copilot' | 'agents-dir'> = ['opencode']
+    const isTTY = process.stdin.isTTY && process.stdout.isTTY
+
+    let profile: string
+    let providers: Provider[]
+
+    if (isTTY) {
+      const selectedProviders = await selectMany('Select providers', PROVIDER_OPTIONS)
+      providers = selectedProviders.length > 0 ? selectedProviders : DEFAULT_PROVIDERS
+
+      const selectedProfile = await selectOne('Select profile', PROFILE_OPTIONS)
+      profile = selectedProfile ?? 'base'
+
+      console.log('')
+      logger.info(`  Profile:   ${profile}`)
+      logger.info(`  Providers: ${providers.join(', ')}`)
+    } else {
+      profile = ctx.args.profile || 'base'
+      providers = DEFAULT_PROVIDERS
+    }
 
     if (ctx.args.global) {
       const targetPath = getGlobalConfigPath()
