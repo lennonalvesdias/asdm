@@ -250,7 +250,11 @@ Before bumping the version, confirm all of the following pass locally:
 npm test                  # all tests green
 npm run typecheck         # no TypeScript errors
 npm run validate:registry # registry integrity confirmed
+# Confirm clean working tree (no uncommitted files)
+git status --short
 ```
+
+> After running `npm run build:manifest`, always confirm `git status` shows no untracked or modified files before tagging. The files `package-lock.json` and `registry/vX.Y.Z.json` (the versioned manifest snapshot) must be included in the release commit.
 
 ### Bumping the version
 
@@ -260,7 +264,7 @@ Update the version in `package.json` manually, or use `npm version` (which also 
 # Option A — manual
 # Edit "version" in package.json, then:
 npm run build:manifest
-git add package.json registry/latest.json
+git add package.json package-lock.json registry/latest.json registry/vX.Y.Z.json
 git commit -m "chore: release vX.Y.Z"
 
 # Option B — npm version (recommended; bumps package.json and tags in one step)
