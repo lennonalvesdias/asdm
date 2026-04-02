@@ -16,6 +16,24 @@ import { verify, VERIFY_EXIT_CODES } from '../../core/verifier.js'
 import { TelemetryWriter } from '../../core/telemetry.js'
 import { logger } from '../../utils/logger.js'
 import { getGlobalLockfilePath } from '../../utils/fs.js'
+import { readProjectConfig } from '../../core/config.js'
+import { RegistryClient } from '../../core/registry-client.js'
+
+/**
+ * Attempt to fetch the latest manifest version from the registry.
+ * Returns undefined on any error (network failure, missing config, etc.).
+ * Exported for unit testing.
+ */
+export async function fetchLatestManifestVersion(cwd: string): Promise<string | undefined> {
+  try {
+    const config = await readProjectConfig(cwd)
+    const client = new RegistryClient(config.registry)
+    const manifest = await client.getLatestManifest()
+    return manifest.version
+  } catch {
+    return undefined
+  }
+}
 
 export default defineCommand({
   meta: {
@@ -43,6 +61,11 @@ export default defineCommand({
       description: 'Verify files installed to global provider config directories',
       default: false,
     },
+    offline: {
+      type: 'boolean',
+      description: 'Skip remote manifest version check (exit code 3 will never trigger)',
+      default: false,
+    },
   },
   async run(ctx) {
     const cwd = process.cwd()
@@ -54,6 +77,8 @@ export default defineCommand({
     const telemetry = new TelemetryWriter(cwd)
     const lockfilePath = ctx.args.global ? getGlobalLockfilePath() : undefined
 
+    // Strict mode (git hooks) — only checks file integrity, not version currency.
+    // Skips remote version check intentionally so hooks never block on network.
     if (ctx.args.strict) {
       const result = await verify(cwd, undefined, true, telemetry, lockfilePath)
       if (useJson) {
@@ -73,8 +98,15 @@ export default defineCommand({
       return
     }
 
+    // Fetch latest manifest version from registry for outdated detection (exit code 3).
+    // Skipped when --offline or --global (global mode has no project config to read).
+    let latestManifestVersion: string | undefined
+    if (!ctx.args.offline && !ctx.args.global) {
+      latestManifestVersion = await fetchLatestManifestVersion(cwd)
+    }
+
     try {
-      const result = await verify(cwd, undefined, true, telemetry, lockfilePath)
+      const result = await verify(cwd, latestManifestVersion, true, telemetry, lockfilePath)
 
       if (useJson) {
         console.log(JSON.stringify(result, null, 2))

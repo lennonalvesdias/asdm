@@ -235,3 +235,82 @@ describe('ModuleName', () => {
 - **SHA-256 integrity**: Every synced asset is hashed and stored in `.asdm-lock.json`. Always verify after download; never trust the manifest hash alone.
 - **Telemetry is optional**: All `telemetry?.write(…)` calls use optional chaining and `.catch(() => {})`. Telemetry outages must never surface to the user.
 - **Global mode**: `asdm sync --global` writes to provider global config dirs; config source = local `.asdm.json` → `~/.config/asdm/config.json` (fallback) → error; lockfile at `~/.config/asdm/global-lock.json`; project-root files (`AGENTS.md`, `CLAUDE.md`) are skipped.
+
+---
+
+## Versioning & Publishing
+
+The package is published as `asdm-cli` on npm. Publishing is triggered automatically by creating a GitHub Release.
+
+### Pre-release checklist
+
+Before bumping the version, confirm all of the following pass locally:
+
+```bash
+npm test                  # all tests green
+npm run typecheck         # no TypeScript errors
+npm run validate:registry # registry integrity confirmed
+```
+
+### Bumping the version
+
+Update the version in `package.json` manually, or use `npm version` (which also creates a local git tag automatically):
+
+```bash
+# Option A — manual
+# Edit "version" in package.json, then:
+npm run build:manifest
+git add package.json registry/latest.json
+git commit -m "chore: release vX.Y.Z"
+
+# Option B — npm version (recommended; bumps package.json and tags in one step)
+npm version patch   # or minor / major
+git push origin main --tags
+```
+
+> **Note**: `npm run build:manifest` must be run after every version bump to keep `registry/latest.json` in sync with the new version.
+
+### Creating the Git tag and GitHub Release
+
+**Via `npm version` (recommended):**
+
+```bash
+npm version patch          # bumps package.json and creates local tag vX.Y.Z
+git push origin main --tags
+```
+
+Then create the GitHub Release through the GitHub UI pointing to the pushed tag. Publishing the release triggers CI/CD.
+
+**Manual approach:**
+
+```bash
+git tag vX.Y.Z
+git push origin vX.Y.Z
+```
+
+Then create the GitHub Release through the GitHub UI targeting that tag.
+
+### What CI/CD does automatically
+
+When a GitHub Release is published (`on: release: types: [published]`), the workflow:
+
+1. Runs `npm ci` — clean install
+2. Runs `npm test` — final safety gate
+3. Runs `npm run build:manifest` — regenerates SHA-256 hashes
+4. Runs `npm run build` — bundles `dist/index.mjs`
+5. Publishes to npm: `npm publish --provenance --access public`
+6. Uploads `registry/latest.json` as `manifest.json` on the GitHub Release (this is the URL consumed by the registry client)
+
+### Version format (semantic versioning)
+
+| Bump | When to use |
+| --- | --- |
+| `patch` (0.1.X) | Bug fixes, documentation, internal refactors |
+| `minor` (0.X.0) | New features, new commands, new registry assets |
+| `major` (X.0.0) | Breaking changes to CLI interface or registry format |
+
+### Required secrets
+
+| Secret | Purpose |
+| --- | --- |
+| `NPM_TOKEN` | Authenticates `npm publish` in CI — must be set in GitHub repository secrets |
