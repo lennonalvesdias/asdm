@@ -17,7 +17,7 @@ export interface ProjectConfig {
   $schema?: string
   registry: string
   profile: string
-  providers?: Array<'opencode' | 'claude-code' | 'copilot'>
+  providers?: Array<'opencode' | 'claude-code' | 'copilot' | 'agents-dir'>
   telemetry?: boolean    // Local telemetry enabled (default: true)
 }
 
@@ -38,7 +38,7 @@ export interface CorporatePolicy {
 export interface ResolvedConfig {
   registry: string
   profile: string
-  providers: Array<'opencode' | 'claude-code' | 'copilot'>
+  providers: Array<'opencode' | 'claude-code' | 'copilot' | 'agents-dir'>
   policy: CorporatePolicy
 }
 
@@ -152,7 +152,7 @@ export function resolveConfig(
   return {
     registry: project.registry,
     profile,
-    providers: providers as Array<'opencode' | 'claude-code' | 'copilot'>,
+    providers: providers as Array<'opencode' | 'claude-code' | 'copilot' | 'agents-dir'>,
     policy,
   }
 }
@@ -165,7 +165,7 @@ export async function createProjectConfigAtPath(
   filePath: string,
   registry: string,
   profile: string,
-  providers: Array<'opencode' | 'claude-code' | 'copilot'> = ['opencode']
+  providers: Array<'opencode' | 'claude-code' | 'copilot' | 'agents-dir'> = ['opencode']
 ): Promise<void> {
   const config: ProjectConfig = {
     $schema: 'https://asdm.dev/schemas/config.schema.json',
@@ -183,7 +183,7 @@ export async function createProjectConfig(
   cwd: string,
   registry: string,
   profile: string,
-  providers: Array<'opencode' | 'claude-code' | 'copilot'> = ['opencode']
+  providers: Array<'opencode' | 'claude-code' | 'copilot' | 'agents-dir'> = ['opencode']
 ): Promise<void> {
   const filePath = path.join(cwd, PROJECT_CONFIG_FILE)
   await createProjectConfigAtPath(filePath, registry, profile, providers)

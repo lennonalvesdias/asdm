@@ -79,6 +79,11 @@ async function loadAdapters(providers: string[]): Promise<EmitAdapter[]> {
         adapters.push(createCopilotAdapter())
         break
       }
+      case 'agents-dir': {
+        const { createAgentsDirAdapter } = await import('../adapters/agents-dir.js')
+        adapters.push(createAgentsDirAdapter())
+        break
+      }
     }
   }
   

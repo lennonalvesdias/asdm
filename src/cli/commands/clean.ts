@@ -75,7 +75,7 @@ export default defineCommand({
     },
     target: {
       type: 'string',
-      description: 'Only clean files for a specific provider (opencode | claude-code | copilot)',
+      description: 'Only clean files for a specific provider (opencode | claude-code | copilot | agents-dir)',
       alias: 't',
     },
   },

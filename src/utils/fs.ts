@@ -92,6 +92,8 @@ const PROVIDER_GLOBAL_DIRS: Record<string, string> = {
   copilot: process.platform === 'win32'
     ? path.join(os.homedir(), 'AppData', 'Roaming', 'GitHub Copilot')
     : path.join(os.homedir(), '.config', 'github-copilot'),
+  // agents-dir uses %USERPROFILE%\.agents on all platforms (no AppData variant)
+  'agents-dir': path.join(os.homedir(), '.agents'),
 }
 
 /** Maps provider name → emitted path prefix (e.g. ".opencode/") */
@@ -99,6 +101,7 @@ const PROVIDER_PATH_PREFIXES: Record<string, string> = {
   opencode: '.opencode/',
   'claude-code': '.claude/',
   copilot: '.github/',
+  'agents-dir': '.agents/',
 }
 
 /**

@@ -17,3 +17,4 @@ providers:
   - opencode
   - claude-code
   - copilot
+  - agents-dir

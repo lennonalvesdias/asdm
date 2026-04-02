@@ -21,7 +21,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "enum": ["opencode", "claude-code", "copilot"]
+        "enum": ["opencode", "claude-code", "copilot", "agents-dir"]
       },
       "uniqueItems": true
     }

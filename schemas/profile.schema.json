@@ -38,7 +38,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "enum": ["opencode", "claude-code", "copilot"]
+        "enum": ["opencode", "claude-code", "copilot", "agents-dir"]
       },
       "uniqueItems": true
     },
@@ -55,6 +55,10 @@
           "additionalProperties": true
         },
         "copilot": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "agents-dir": {
           "type": "object",
           "additionalProperties": true
         }

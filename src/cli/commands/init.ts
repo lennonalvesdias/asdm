@@ -57,7 +57,7 @@ export default defineCommand({
     const cwd = process.cwd()
     const profile = ctx.args.profile || 'base'
     const registry = ctx.args.registry || DEFAULT_REGISTRY
-    const providers: Array<'opencode' | 'claude-code' | 'copilot'> = ['opencode']
+    const providers: Array<'opencode' | 'claude-code' | 'copilot' | 'agents-dir'> = ['opencode']
 
     if (ctx.args.global) {
       const targetPath = getGlobalConfigPath()

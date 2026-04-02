@@ -12,3 +12,4 @@ emit_targets:
   - opencode
   - claude-code
   - copilot
+  - agents-dir

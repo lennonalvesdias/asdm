@@ -20,7 +20,8 @@
     "allowed_providers": [
       "opencode",
       "claude-code",
-      "copilot"
+      "copilot",
+      "agents-dir"
     ],
     "min_cli_version": "0.2.0"
   },
@@ -41,7 +42,8 @@
       "providers": [
         "opencode",
         "claude-code",
-        "copilot"
+        "copilot",
+        "agents-dir"
       ]
     },
     "data-analytics": {
