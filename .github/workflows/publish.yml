@@ -1,35 +1,52 @@
 name: Publish
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   publish:
-    name: Publish to npm
+    name: Create release and publish to npm
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed to upload release assets
+      contents: write   # needed to create release and upload assets
       id-token: write   # for npm provenance
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
+
       - run: npm ci
+
       - name: Run tests
         run: npm test
+
       - name: Build manifest
         run: npx tsx scripts/build-manifest.ts
+
       - name: Build
         run: npm run build
-      - name: Publish
+
+      - name: Create GitHub Release
+        run: |
+          gh release create ${{ github.ref_name }} \
+            --title "${{ github.ref_name }}" \
+            --generate-notes \
+            --verify-tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to npm
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Upload registry assets
+
+      - name: Upload registry manifest
         run: |
           cp registry/latest.json manifest.json
           gh release upload ${{ github.ref_name }} manifest.json --clobber
