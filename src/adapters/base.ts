@@ -42,6 +42,13 @@ export interface EmitAdapter {
    * (.opencode/opencode.jsonc, .claude/settings.json, etc.)
    */
   emitConfig(profile: ResolvedProfile, targetDir: string): EmittedFile[]
+
+  /**
+   * Async variant of emitConfig — preferred when I/O detection is needed
+   * (e.g. checking whether .json already exists before choosing extension).
+   * If present, the syncer will call this instead of emitConfig.
+   */
+  emitConfigAsync?(profile: ResolvedProfile, targetDir: string): Promise<EmittedFile[]>
 }
 
 /** Create an EmittedFile from path and string content */

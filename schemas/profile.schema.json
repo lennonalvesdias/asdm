@@ -48,7 +48,28 @@
       "properties": {
         "opencode": {
           "type": "object",
-          "additionalProperties": true
+          "additionalProperties": true,
+          "description": "Passthrough config for opencode.jsonc — see https://opencode.ai/docs/config/",
+          "properties": {
+            "model": { "type": "string", "description": "Default model (provider/model-id)" },
+            "small_model": { "type": "string", "description": "Lightweight model for title generation" },
+            "default_agent": { "type": "string", "description": "Default primary agent name" },
+            "agent": { "type": "object", "additionalProperties": true, "description": "Per-agent runtime config (model, temperature, permissions)" },
+            "permission": { "description": "Top-level tool permission rules" },
+            "mcp": { "type": "object", "additionalProperties": true, "description": "MCP server definitions" },
+            "plugin": { "type": "array", "items": { "type": "string" }, "description": "npm plugin package names" },
+            "instructions": { "type": "array", "items": { "type": "string" }, "description": "Additional instruction files, globs, or URLs" },
+            "tools": { "type": "object", "additionalProperties": true, "description": "Tool enable/disable map" },
+            "command": { "type": "object", "additionalProperties": true, "description": "Custom slash command definitions" },
+            "formatter": { "description": "Code formatter config (object or false to disable all)" },
+            "lsp": { "description": "LSP server config (object or false to disable all)" },
+            "provider": { "type": "object", "additionalProperties": true, "description": "Provider/model configuration" },
+            "share": { "type": "string", "enum": ["manual", "auto", "disabled"] },
+            "autoupdate": { "description": "true | false | \"notify\"" },
+            "compaction": { "type": "object", "additionalProperties": true },
+            "watcher": { "type": "object", "additionalProperties": true },
+            "experimental": { "type": "object", "additionalProperties": true }
+          }
         },
         "claude-code": {
           "type": "object",

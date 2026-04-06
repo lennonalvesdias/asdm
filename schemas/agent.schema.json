@@ -39,6 +39,11 @@
           "type": "object",
           "additionalProperties": true,
           "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["primary", "subagent"],
+              "description": "Agent mode — primary agents are user-selectable, subagents are invoked by other agents via the task tool"
+            },
             "model": { "type": "string" },
             "permissions": {
               "type": "array",
