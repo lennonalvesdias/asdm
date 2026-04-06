@@ -179,6 +179,7 @@ export function resolveProfileFromManifest(
     skills?: string[]
     commands?: string[]
     providers?: string[]
+    provider_config?: Record<string, Record<string, unknown>>
   }>,
   profileName: string,
   visited: Set<string> = new Set()
@@ -224,6 +225,10 @@ export function resolveProfileFromManifest(
     skills: mergeStringArrays(resolved.skills, profile.skills ?? []),
     commands: mergeStringArrays(resolved.commands, profile.commands ?? []),
     providers: [...new Set([...resolved.providers, ...(profile.providers ?? [])])],
+    provider_config: mergeProviderConfig(
+      resolved.provider_config,
+      profile.provider_config ?? {}
+    ),
     resolvedFrom: [...resolved.resolvedFrom, profileName],
   }
 

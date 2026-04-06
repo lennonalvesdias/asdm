@@ -8,7 +8,7 @@
 import { defineCommand } from 'citty'
 import { readProjectConfig } from '../../core/config.js'
 import { readLockfile } from '../../core/lockfile.js'
-import { RegistryClient } from '../../core/registry-client.js'
+import { createRegistryClient } from '../../core/file-registry-client.js'
 import { resolveProfileFromManifest } from '../../core/profile-resolver.js'
 import { logger } from '../../utils/logger.js'
 import { ConfigError } from '../../utils/errors.js'
@@ -87,7 +87,7 @@ async function listAvailableAgents(cwd: string, asJson: boolean): Promise<void> 
   }
 
   try {
-    const client = new RegistryClient(projectConfig.registry)
+    const client = createRegistryClient(projectConfig.registry)
     const manifest = await client.getLatestManifest()
     const resolved = resolveProfileFromManifest(manifest.profiles, projectConfig.profile)
 

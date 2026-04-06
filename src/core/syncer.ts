@@ -16,14 +16,14 @@
 
 import path from 'node:path'
 import { readProjectConfigFromPath, readUserConfig, resolveConfig } from './config.js'
-import { RegistryClient } from './registry-client.js'
+import { createRegistryClient } from './file-registry-client.js'
 import { resolveProfileFromManifest } from './profile-resolver.js'
 import { getProfileAssetPaths, diffManifest } from './manifest.js'
 import { readLockfile, buildLockfile, writeLockfile, createLockEntry } from './lockfile.js'
 import { hashString } from './hash.js'
 import { writeFile, readFile, listFiles, ensureDir, getAsdmCacheDir, resolveGlobalEmitPath, getGlobalLockfilePath, removeFile } from '../utils/fs.js'
 import { IntegrityError } from '../utils/errors.js'
-import type { EmitAdapter, EmittedFile } from '../adapters/base.js'
+import type { EmitAdapter, EmittedFile, ResolvedProfile } from '../adapters/base.js'
 import type { ParsedAsset } from './parser.js'
 import { parseAsset } from './parser.js'
 import type { TelemetryWriter } from './telemetry.js'
@@ -142,7 +142,7 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
     const userConfig = await readUserConfig(cwd)
     
     // Step 2: Initialize registry client
-    const client = new RegistryClient(projectConfig.registry)
+    const client = createRegistryClient(projectConfig.registry)
     
     // Step 3: Fetch manifest
     const manifest = await client.getLatestManifest()
@@ -298,7 +298,9 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
       const rootFiles = adapter.emitRootInstructions(resolvedProfile, cwd)
       allEmittedFiles.push(...rootFiles)
       
-      const configFiles = adapter.emitConfig(resolvedProfile, cwd)
+      const configFiles = 'emitConfigAsync' in adapter && typeof (adapter as { emitConfigAsync?: unknown }).emitConfigAsync === 'function'
+        ? await (adapter as { emitConfigAsync: (p: ResolvedProfile, d: string) => Promise<EmittedFile[]> }).emitConfigAsync(resolvedProfile, cwd)
+        : adapter.emitConfig(resolvedProfile, cwd)
       allEmittedFiles.push(...configFiles)
     }
 

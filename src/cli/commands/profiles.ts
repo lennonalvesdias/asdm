@@ -7,7 +7,7 @@
 
 import { defineCommand } from 'citty'
 import { readProjectConfig } from '../../core/config.js'
-import { RegistryClient } from '../../core/registry-client.js'
+import { createRegistryClient } from '../../core/file-registry-client.js'
 import { logger } from '../../utils/logger.js'
 import { ConfigError } from '../../utils/errors.js'
 
@@ -38,7 +38,7 @@ export default defineCommand({
     }
 
     try {
-      const client = new RegistryClient(projectConfig.registry)
+      const client = createRegistryClient(projectConfig.registry)
       const manifest = await client.getLatestManifest()
 
       if (ctx.args.json) {

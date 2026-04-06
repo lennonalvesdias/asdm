@@ -18,6 +18,7 @@
 import { defineCommand } from 'citty'
 import path from 'node:path'
 import { readProjectConfig } from '../../core/config.js'
+import { createRegistryClient, FileRegistryClient } from '../../core/file-registry-client.js'
 import { RegistryClient } from '../../core/registry-client.js'
 import { readLockfile } from '../../core/lockfile.js'
 import { verify, VERIFY_EXIT_CODES } from '../../core/verifier.js'
@@ -58,7 +59,7 @@ export default defineCommand({
 
     // Retain config and client for later checks without re-reading
     let projectConfig: ProjectConfig | null = null
-    let registryClient: RegistryClient | null = null
+    let registryClient: RegistryClient | FileRegistryClient | null = null
 
     // -----------------------------------------------------------------------
     // Check 1: .asdm.json present
@@ -78,7 +79,7 @@ export default defineCommand({
     if (hasConfig) {
       try {
         projectConfig = await readProjectConfig(cwd)
-        registryClient = new RegistryClient(projectConfig.registry)
+        registryClient = createRegistryClient(projectConfig.registry)
         const reachable = await registryClient.ping()
         checks.push({
           label: `Registry reachable (${projectConfig.registry})`,

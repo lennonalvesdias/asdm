@@ -8,7 +8,7 @@
  * Translates to: https://api.github.com/repos/{org}/{repo}/releases/latest
  */
 
-import { NetworkError, RegistryError } from '../utils/errors.js'
+import { ConfigError, NetworkError, RegistryError } from '../utils/errors.js'
 import { parseRegistryUrl } from './config.js'
 import type { AsdmManifest } from './manifest.js'
 
@@ -92,9 +92,15 @@ export class RegistryClient {
   private readonly options: Required<RegistryClientOptions>
 
   constructor(registryUrl: string, options: RegistryClientOptions = {}) {
-    const { org, repo } = parseRegistryUrl(registryUrl)
-    this.org = org
-    this.repo = repo
+    const parsed = parseRegistryUrl(registryUrl)
+    if (parsed.type !== 'github') {
+      throw new ConfigError(
+        `RegistryClient only supports github:// URLs, got: "${registryUrl}"`,
+        'Use createRegistryClient() to create the appropriate client'
+      )
+    }
+    this.org = parsed.org
+    this.repo = parsed.repo
     this.options = {
       token: options.token ?? getGithubToken() ?? '',
       timeout: options.timeout ?? 30000,

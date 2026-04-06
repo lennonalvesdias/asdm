@@ -17,7 +17,7 @@ import { TelemetryWriter } from '../../core/telemetry.js'
 import { logger } from '../../utils/logger.js'
 import { getGlobalLockfilePath } from '../../utils/fs.js'
 import { readProjectConfig } from '../../core/config.js'
-import { RegistryClient } from '../../core/registry-client.js'
+import { createRegistryClient } from '../../core/file-registry-client.js'
 
 /**
  * Attempt to fetch the latest manifest version from the registry.
@@ -27,7 +27,7 @@ import { RegistryClient } from '../../core/registry-client.js'
 export async function fetchLatestManifestVersion(cwd: string): Promise<string | undefined> {
   try {
     const config = await readProjectConfig(cwd)
-    const client = new RegistryClient(config.registry)
+    const client = createRegistryClient(config.registry)
     const manifest = await client.getLatestManifest()
     return manifest.version
   } catch {

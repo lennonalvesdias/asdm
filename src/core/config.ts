@@ -10,6 +10,7 @@
  */
 
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { readJson, writeJson } from '../utils/fs.js'
 import { ConfigError, PolicyError } from '../utils/errors.js'
 
@@ -45,16 +46,32 @@ export interface ResolvedConfig {
 const PROJECT_CONFIG_FILE = '.asdm.json'
 const USER_CONFIG_FILE = '.asdm.local.json'
 
-/** Parse and validate the github:// registry URL format */
-export function parseRegistryUrl(url: string): { org: string; repo: string } {
+export type ParsedRegistry =
+  | { type: 'github'; org: string; repo: string }
+  | { type: 'file'; path: string }
+
+/** Parse and validate the registry URL — supports github:// and file:// formats */
+export function parseRegistryUrl(url: string): ParsedRegistry {
+  if (url.startsWith('file://')) {
+    let filePath: string
+    try {
+      filePath = fileURLToPath(url)
+    } catch {
+      throw new ConfigError(
+        `Invalid file registry URL: "${url}"`,
+        'File registry URL must be in format: file:///absolute/path'
+      )
+    }
+    return { type: 'file', path: filePath }
+  }
   const match = url.match(/^github:\/\/([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)$/)
   if (!match) {
     throw new ConfigError(
       `Invalid registry URL: "${url}"`,
-      'Registry URL must be in format: github://{org}/{repo}'
+      'Registry URL must be in format: github://{org}/{repo} or file:///absolute/path'
     )
   }
-  return { org: match[1]!, repo: match[2]! }
+  return { type: 'github', org: match[1]!, repo: match[2]! }
 }
 
 /** Validate fields and registry URL on a parsed config object */

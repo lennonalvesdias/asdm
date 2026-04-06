@@ -32,6 +32,7 @@ interface ManifestProfile {
   skills?: string[]
   commands?: string[]
   providers?: string[]
+  provider_config?: Record<string, Record<string, unknown>>
 }
 
 interface ManifestPolicy {
@@ -155,6 +156,13 @@ async function scanProfiles(): Promise<Record<string, ManifestProfile>> {
       if (Array.isArray(yaml['skills'])) profile.skills = yaml['skills'] as string[]
       if (Array.isArray(yaml['commands'])) profile.commands = yaml['commands'] as string[]
       if (Array.isArray(yaml['providers'])) profile.providers = yaml['providers'] as string[]
+      if (
+        yaml['provider_config'] &&
+        typeof yaml['provider_config'] === 'object' &&
+        !Array.isArray(yaml['provider_config'])
+      ) {
+        profile.provider_config = yaml['provider_config'] as Record<string, Record<string, unknown>>
+      }
 
       profiles[dir.name] = profile
     } catch {
