@@ -53,9 +53,27 @@ export type ParsedRegistry =
 /** Parse and validate the registry URL — supports github:// and file:// formats */
 export function parseRegistryUrl(url: string): ParsedRegistry {
   if (url.startsWith('file://')) {
+    // fileURLToPath('file://') succeeds on some platforms but returns an
+    // invalid root path. Explicitly reject file:// URLs with no meaningful
+    // path segment by parsing the URL first and checking pathname.
+    let parsed: URL
+    try {
+      parsed = new URL(url)
+    } catch {
+      throw new ConfigError(
+        `Invalid file registry URL: "${url}"`,
+        'File registry URL must be in format: file:///absolute/path'
+      )
+    }
+    if (!parsed.pathname || parsed.pathname === '/') {
+      throw new ConfigError(
+        `Invalid file registry URL: "${url}"`,
+        'File registry URL must be in format: file:///absolute/path'
+      )
+    }
     let filePath: string
     try {
-      filePath = fileURLToPath(url)
+      filePath = fileURLToPath(parsed)
     } catch {
       throw new ConfigError(
         `Invalid file registry URL: "${url}"`,
