@@ -90,11 +90,15 @@ function stubFetch(): void {
 
       if (u.includes('api.github.com') && u.includes('releases/latest')) {
         return Promise.resolve(makeResponse(JSON.stringify({
-          assets: [{ name: 'manifest.json', browser_download_url: 'https://example.com/manifest.json' }],
+          assets: [{
+            name: 'manifest.json',
+            url: 'https://api.github.com/repos/test-org/test-repo/releases/assets/1',
+            browser_download_url: 'https://github.com/test-org/test-repo/releases/download/v1.0.0/manifest.json',
+          }],
         })))
       }
 
-      if (u.includes('manifest.json')) {
+      if (u.includes('releases/assets/')) {
         return Promise.resolve(makeResponse(JSON.stringify(manifest)))
       }
 

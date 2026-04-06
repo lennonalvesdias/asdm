@@ -136,7 +136,7 @@ export class RegistryClient {
     }
 
     const release = await response.json() as {
-      assets: Array<{ name: string; browser_download_url: string }>
+      assets: Array<{ name: string; url: string; browser_download_url: string }>
     }
 
     // Find manifest.json in release assets
@@ -149,13 +149,18 @@ export class RegistryClient {
     }
 
     const manifestResponse = await fetchWithRetry(
-      manifestAsset.browser_download_url,
-      { headers: this.headers },
+      manifestAsset.url,
+      { headers: { ...this.headers, 'Accept': 'application/octet-stream' } },
       this.options.maxRetries
     )
 
     if (!manifestResponse.ok) {
-      throw new RegistryError(`Failed to download manifest.json: HTTP ${manifestResponse.status}`)
+      throw new RegistryError(
+        `Failed to download manifest.json: HTTP ${manifestResponse.status}`,
+        manifestResponse.status === 401 || manifestResponse.status === 404
+          ? 'Set GITHUB_TOKEN or ASDM_GITHUB_TOKEN with repo scope for private repositories'
+          : undefined
+      )
     }
 
     return manifestResponse.json() as Promise<AsdmManifest>
