@@ -16,6 +16,10 @@
 
 import { defineCommand } from 'citty'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { existsSync } from 'node:fs'
+import { readdir, readFile as readFileRaw } from 'node:fs/promises'
+import { parse as parseYaml } from 'yaml'
 import { exists, ensureDir, getGlobalConfigPath } from '../../utils/fs.js'
 import { updateGitignore } from '../../utils/gitignore.js'
 import { createProjectConfig, createProjectConfigAtPath } from '../../core/config.js'
@@ -36,13 +40,40 @@ const PROVIDER_OPTIONS: Array<{ label: string; value: Provider }> = [
   { label: 'agents-dir  — Cross-provider agents directory (.agents/)', value: 'agents-dir' },
 ]
 
-const PROFILE_OPTIONS: Array<{ label: string; value: string }> = [
-  { label: 'base               — Base configuration with common agents and skills', value: 'base' },
-  { label: 'data-analytics     — Data analysis, SQL, pandas, and reporting', value: 'data-analytics' },
-  { label: 'fullstack-engineer — Full-stack web development', value: 'fullstack-engineer' },
-  { label: 'mobile             — Mobile development (iOS + Android)', value: 'mobile' },
-  { label: 'security           — Security auditing and threat modeling', value: 'security' },
-]
+function findPackageRoot(): string {
+  const currentFile = fileURLToPath(import.meta.url)
+  let dir = path.dirname(currentFile)
+  while (true) {
+    if (existsSync(path.join(dir, 'package.json'))) return dir
+    const parent = path.dirname(dir)
+    if (parent === dir) throw new Error('Could not find package root (package.json not found)')
+    dir = parent
+  }
+}
+
+async function loadProfileOptions(): Promise<Array<{ label: string; value: string }>> {
+  const root = findPackageRoot()
+  const profilesDir = path.join(root, 'registry', 'profiles')
+  const entries = await readdir(profilesDir, { withFileTypes: true })
+  const dirs = entries.filter(e => e.isDirectory()).map(e => e.name).sort()
+
+  const options: Array<{ label: string; value: string }> = []
+  for (const name of dirs) {
+    const yamlPath = path.join(profilesDir, name, 'profile.yaml')
+    const raw = await readFileRaw(yamlPath, 'utf-8')
+    const parsed = parseYaml(raw) as Record<string, unknown>
+    const displayName = typeof parsed?.name === 'string' ? parsed.name : name
+    const description = typeof parsed?.description === 'string' ? parsed.description : ''
+    const pad = displayName.padEnd(20)
+    options.push({ label: `${pad}— ${description}`, value: name })
+  }
+
+  if (options.length === 0) {
+    throw new Error('No profiles found in registry/profiles/')
+  }
+
+  return options
+}
 
 export default defineCommand({
   meta: {
@@ -86,10 +117,20 @@ export default defineCommand({
     let providers: Provider[]
 
     if (isTTY) {
+      let profileOptions: Array<{ label: string; value: string }>
+      try {
+        profileOptions = await loadProfileOptions()
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        logger.error(message)
+        process.exitCode = 1
+        return
+      }
+
       const selectedProviders = await selectMany('Select providers', PROVIDER_OPTIONS)
       providers = selectedProviders.length > 0 ? selectedProviders : DEFAULT_PROVIDERS
 
-      const selectedProfile = await selectOne('Select profile', PROFILE_OPTIONS)
+      const selectedProfile = await selectOne('Select profile', profileOptions)
       profile = selectedProfile ?? 'base'
 
       console.log('')
