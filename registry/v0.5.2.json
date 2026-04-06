@@ -44,7 +44,52 @@
         "claude-code",
         "copilot",
         "agents-dir"
-      ]
+      ],
+      "provider_config": {
+        "opencode": {
+          "model": "github-copilot/claude-sonnet-4.6",
+          "small_model": "github-copilot/claude-haiku-4.5",
+          "agent": {
+            "plan": {
+              "model": "github-copilot/claude-opus-4.6",
+              "temperature": 0.3,
+              "reasoningEffort": "high",
+              "textVerbosity": "low",
+              "permission": {
+                "edit": "deny",
+                "write": "deny",
+                "bash": {
+                  "*": "deny"
+                },
+                "task": "allow"
+              }
+            },
+            "build": {
+              "model": "github-copilot/claude-sonnet-4.6",
+              "temperature": 0.3,
+              "reasoningEffort": "medium",
+              "textVerbosity": "low",
+              "permission": {
+                "edit": "deny",
+                "write": "deny",
+                "bash": {
+                  "*": "deny"
+                },
+                "task": "allow"
+              }
+            }
+          },
+          "permission": {
+            "task": "deny",
+            "webfetch": "deny"
+          },
+          "plugin": [
+            "@tarquinen/opencode-dcp@1.2.7",
+            "@franlol/opencode-md-table-formatter@0.0.3",
+            "@plannotator/opencode@latest"
+          ]
+        }
+      }
     },
     "data-analytics": {
       "extends": [
@@ -97,7 +142,34 @@
         "opencode",
         "claude-code",
         "copilot"
-      ]
+      ],
+      "provider_config": {
+        "opencode": {
+          "theme": "dark",
+          "mcp": {
+            "context7": {
+              "type": "remote",
+              "url": "https://mcp.context7.com/mcp",
+              "enabled": true
+            },
+            "exa": {
+              "type": "remote",
+              "url": "https://mcp.exa.ai/mcp",
+              "enabled": true
+            }
+          }
+        },
+        "claude-code": {
+          "permissions": {
+            "allow": [
+              "Read(**)",
+              "Write(src/**)",
+              "Bash(npm test)",
+              "Bash(npm run build)"
+            ]
+          }
+        }
+      }
     },
     "mobile": {
       "extends": [
@@ -152,38 +224,38 @@
   },
   "assets": {
     "agents/architect.asdm.md": {
-      "sha256": "cac0b010fd350f9d23bfbb090327dc2e8e971be9daafa764269619224c5ca742",
-      "size": 3011,
+      "sha256": "e73bba2e7e220e7cdcaad12ecdcea385dbc13daa72c5253cd2e8b9e845ae14a3",
+      "size": 3030,
       "version": "1.0.0"
     },
     "agents/code-reviewer.asdm.md": {
-      "sha256": "682c73710a84ad8c40e3d8548f82811390ce3db32c6f136116afcde7f87fc75d",
-      "size": 2911,
+      "sha256": "c2bd0044cdb81400d84152e38a1de503be2ea14e81372cebaa8fa581ebdbce3d",
+      "size": 2930,
       "version": "1.0.0"
     },
     "agents/data-analyst.asdm.md": {
-      "sha256": "bb0ce105b9dd19eaef3be5d6b76f5ad273b4b95057d3bb2c998acbaf3dfc7589",
-      "size": 2865,
+      "sha256": "883fbaaf2083c6410936ef4315d1ea08ea1d8a8a493f6cdb151d867159e8103e",
+      "size": 2884,
       "version": "1.0.0"
     },
     "agents/documentation-writer.asdm.md": {
-      "sha256": "05f22780898bdc7dc9e842caab967241b99e02ca7d43d30b09ca8d19fc85d63a",
-      "size": 2788,
+      "sha256": "909b13482d750b5890259e5e145b86bba5ccd53b81f21a6decdf31c57e3220d9",
+      "size": 2807,
       "version": "1.0.0"
     },
     "agents/mobile-engineer.asdm.md": {
-      "sha256": "ab51f952dcc8ce72cf3f48359e11c30fc7a3f5b32b534e56b04ee47cd382c3bd",
-      "size": 2903,
+      "sha256": "413a00c17b623df1ca259bdca8719585df7ce71a6006f8cd2b5fcb8c380935c1",
+      "size": 2922,
       "version": "1.0.0"
     },
     "agents/security-auditor.asdm.md": {
-      "sha256": "8285378a7b30009a02f537d9fc882344c50444c1c1fe1b0ff35b8e49e475b2eb",
-      "size": 3167,
+      "sha256": "7677c74b92ee3751f21b472dc122eddedb424ce3e191dbdb479f02ac6d8b2153",
+      "size": 3186,
       "version": "1.0.0"
     },
     "agents/test-engineer.asdm.md": {
-      "sha256": "e23266b82c0e3ccb96d613167c3c27d88651ff159fcb8e9b8eaf34b125681278",
-      "size": 2811,
+      "sha256": "5af25cd63d2bac8cc48f01c902974796abed53139c6fedbf23725550ddc5b6ab",
+      "size": 2830,
       "version": "1.0.0"
     },
     "skills/api-design/SKILL.asdm.md": {

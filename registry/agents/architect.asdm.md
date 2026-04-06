@@ -7,6 +7,7 @@ tags: [architecture, design, scalability, patterns]
 
 providers:
   opencode:
+    mode: subagent
     model: anthropic/claude-sonnet-4
     permissions:
       - read

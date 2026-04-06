@@ -7,6 +7,7 @@ tags: [security, audit, vulnerabilities, owasp, compliance]
 
 providers:
   opencode:
+    mode: subagent
     model: anthropic/claude-sonnet-4
     permissions:
       - read

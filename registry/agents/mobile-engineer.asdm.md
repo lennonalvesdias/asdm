@@ -7,6 +7,7 @@ tags: [mobile, react-native, flutter, ios, android]
 
 providers:
   opencode:
+    mode: subagent
     model: anthropic/claude-sonnet-4
     permissions:
       - read

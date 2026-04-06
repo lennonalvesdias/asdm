@@ -7,6 +7,7 @@ tags: [testing, tdd, quality, automation]
 
 providers:
   opencode:
+    mode: subagent
     model: anthropic/claude-sonnet-4
     permissions:
       - read

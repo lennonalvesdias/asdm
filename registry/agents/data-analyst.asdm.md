@@ -7,6 +7,7 @@ tags: [data, analytics, pipeline, sql, python]
 
 providers:
   opencode:
+    mode: subagent
     model: anthropic/claude-sonnet-4
     permissions:
       - read

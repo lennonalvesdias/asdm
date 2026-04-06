@@ -7,6 +7,7 @@ tags: [review, security, quality, best-practices]
 
 providers:
   opencode:
+    mode: subagent
     model: anthropic/claude-sonnet-4
     permissions:
       - read

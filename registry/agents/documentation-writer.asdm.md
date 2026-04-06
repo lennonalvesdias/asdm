@@ -7,6 +7,7 @@ tags: [documentation, writing, readme, api-docs]
 
 providers:
   opencode:
+    mode: subagent
     model: anthropic/claude-sonnet-4
     permissions:
       - read
