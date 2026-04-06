@@ -107,4 +107,66 @@ describe('resolveProfileFromManifest', () => {
     expect(resolved.agents).not.toContain('agent-b')
     expect(resolved.agents).toContain('agent-c')
   })
+
+  it('propagates provider_config from manifest profiles', () => {
+    const profiles = {
+      base: {
+        agents: [],
+        skills: [],
+        commands: [],
+        providers: ['opencode'],
+        provider_config: {
+          opencode: {
+            theme: 'dark',
+            mcp_servers: [{ name: 'postgres', command: 'npx', args: ['-y', '@mcp/server-postgres'] }],
+          },
+        },
+      },
+      child: {
+        extends: ['base'],
+        agents: [],
+        skills: [],
+        commands: [],
+        provider_config: {
+          opencode: { model: 'claude-sonnet' },
+        },
+      },
+    }
+    const resolved = resolveProfileFromManifest(profiles, 'child')
+    expect(resolved.provider_config['opencode']?.['theme']).toBe('dark')
+    expect(resolved.provider_config['opencode']?.['model']).toBe('claude-sonnet')
+    const mcpServers = resolved.provider_config['opencode']?.['mcp_servers'] as Array<{ name: string }>
+    expect(mcpServers).toHaveLength(1)
+    expect(mcpServers[0]?.name).toBe('postgres')
+  })
+
+  it('merges provider_config arrays without duplication across inheritance', () => {
+    const profiles = {
+      base: {
+        agents: [],
+        skills: [],
+        commands: [],
+        provider_config: {
+          opencode: {
+            mcp_servers: [{ name: 'pg', command: 'npx' }],
+          },
+        },
+      },
+      child: {
+        extends: ['base'],
+        agents: [],
+        skills: [],
+        commands: [],
+        provider_config: {
+          opencode: {
+            mcp_servers: [{ name: 'redis', command: 'npx' }],
+          },
+        },
+      },
+    }
+    const resolved = resolveProfileFromManifest(profiles, 'child')
+    const servers = resolved.provider_config['opencode']?.['mcp_servers'] as Array<{ name: string }>
+    expect(servers.some(s => s.name === 'pg')).toBe(true)
+    expect(servers.some(s => s.name === 'redis')).toBe(true)
+  })
 })

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
+import { fileURLToPath } from 'node:url'
 import {
   readProjectConfig,
   readUserConfig,
@@ -31,12 +32,30 @@ afterEach(async () => {
 describe('parseRegistryUrl', () => {
   it('parses valid github:// URL', () => {
     const result = parseRegistryUrl('github://my-org/my-repo')
-    expect(result).toEqual({ org: 'my-org', repo: 'my-repo' })
+    expect(result).toEqual({ type: 'github', org: 'my-org', repo: 'my-repo' })
   })
 
   it('throws ConfigError for invalid URL', () => {
     expect(() => parseRegistryUrl('https://github.com/org/repo')).toThrow(ConfigError)
     expect(() => parseRegistryUrl('github://invalid')).toThrow(ConfigError)
+  })
+
+  it('parses valid file:// URL', () => {
+    // Windows requires a drive letter; Unix-style paths (no drive) are invalid on Windows
+    const testUrl = process.platform === 'win32'
+      ? 'file:///C:/path/to/registry'
+      : 'file:///path/to/registry'
+    const result = parseRegistryUrl(testUrl)
+    expect(result).toEqual({ type: 'file', path: fileURLToPath(testUrl) })
+  })
+
+  it('parses file:// URL with Windows-style path', () => {
+    const result = parseRegistryUrl('file:///C:/Users/test/registry')
+    expect(result).toEqual({ type: 'file', path: fileURLToPath('file:///C:/Users/test/registry') })
+  })
+
+  it('throws ConfigError for file:// URL with empty path', () => {
+    expect(() => parseRegistryUrl('file://')).toThrow(ConfigError)
   })
 })
 
