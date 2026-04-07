@@ -69,13 +69,22 @@ function formatAgentContent(parsed: ParsedAsset): string {
   return `---\n${headerComments}\n${yamlBody}---\n\n${parsed.body}`
 }
 
-/** Format a skill as an OpenCode SKILL.md file */
+/** Format a skill as an OpenCode SKILL.md file with YAML frontmatter */
 function formatSkillContent(parsed: ParsedAsset): string {
-  return [
-    managedFileHeader(ADAPTER_NAME),
-    '',
-    parsed.body,
-  ].join('\n')
+  const headerLines = managedFileHeader(ADAPTER_NAME)
+    .split('\n')
+    // defensive: ensure all lines are non-empty YAML comments
+    .filter(l => l.length > 0)
+    .map(l => l.startsWith('#') ? l : `# ${l}`)
+    .join('\n')
+
+  const frontmatter: Record<string, unknown> = {
+    name: parsed.name,
+    description: parsed.description,
+  }
+
+  const yamlBody = stringifyYaml(frontmatter)
+  return `---\n${headerLines}\n${yamlBody}---\n\n${parsed.body}`
 }
 
 /** Format a command as an OpenCode command file with YAML frontmatter */

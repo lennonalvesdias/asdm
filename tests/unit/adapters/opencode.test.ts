@@ -210,9 +210,52 @@ describe('OpenCodeAdapter', () => {
       expect(files[0]?.relativePath).toBe('.opencode/skills/react-best-practices/SKILL.md')
     })
 
-    it('includes skill body', () => {
+    it('content starts with YAML frontmatter fence', () => {
       const files = adapter.emitSkill(SAMPLE_SKILL, '/project')
-      expect(files[0]?.content).toContain('React Best Practices')
+      expect(String(files[0]?.content)).toMatch(/^---\n/)
+    })
+
+    it('includes managed-file header as YAML comments inside frontmatter', () => {
+      const files = adapter.emitSkill(SAMPLE_SKILL, '/project')
+      const content = String(files[0]?.content)
+      expect(content).toContain('ASDM MANAGED FILE')
+      // Header must be inside the opening --- block, not before it
+      const firstFenceEnd = content.indexOf('\n---\n', 4)
+      const headerIdx = content.indexOf('ASDM MANAGED FILE')
+      expect(headerIdx).toBeGreaterThan(0)
+      expect(headerIdx).toBeLessThan(firstFenceEnd)
+    })
+
+    it('contains name field in frontmatter', () => {
+      const files = adapter.emitSkill(SAMPLE_SKILL, '/project')
+      expect(String(files[0]?.content)).toContain('name: react-best-practices')
+    })
+
+    it('contains description field in frontmatter', () => {
+      const files = adapter.emitSkill(SAMPLE_SKILL, '/project')
+      expect(String(files[0]?.content)).toContain('description:')
+    })
+
+    it('body appears after the closing frontmatter fence', () => {
+      const files = adapter.emitSkill(SAMPLE_SKILL, '/project')
+      const content = String(files[0]?.content)
+      expect(content).toContain('---\n\n# React Best Practices')
+    })
+
+    it('includes skill body content', () => {
+      const files = adapter.emitSkill(SAMPLE_SKILL, '/project')
+      expect(files[0]?.content).toContain('functional components')
+    })
+
+    it('generates parseable YAML frontmatter', () => {
+      const files = adapter.emitSkill(SAMPLE_SKILL, '/project')
+      const content = String(files[0]?.content)
+      // Split on '---' yields: ['', '\nheader+yaml\n', '\n\nbody']
+      const yamlBlock = content.split('---')[1]!
+      const result = parseYaml(yamlBlock) as Record<string, unknown>
+      expect(typeof result).toBe('object')
+      expect(typeof result['name']).toBe('string')
+      expect(typeof result['description']).toBe('string')
     })
   })
 
