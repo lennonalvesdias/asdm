@@ -294,33 +294,33 @@
       "version": "1.0.0"
     },
     "commands/analyze-schema.asdm.md": {
-      "sha256": "2c855b9b02257cecc71c5a03faa05da52e215df148aa141c9258db8e0d2b6174",
-      "size": 2538,
+      "sha256": "541e9a8f5ff6efd05742f34a7342f2d4443acbdd52dfc7677e40b47cc318b321",
+      "size": 2581,
       "version": "1.0.0"
     },
     "commands/audit-deps.asdm.md": {
-      "sha256": "b5d54e07d9596b996090aae8e83476fb2d53b62301dd3feef82facd3d08f7150",
-      "size": 2781,
+      "sha256": "fd364230778974ab29ce74b6d7964660b088987dda49184bfe170703ea1a08c0",
+      "size": 2824,
       "version": "1.0.0"
     },
     "commands/check-file.asdm.md": {
-      "sha256": "3090793fb1eb3484626f7a4c9569df87ff486586e2e3f4046c15749003a4af73",
-      "size": 1700,
+      "sha256": "54470ed36f2e7d05f85db7dcfdc8e2bcb4fee568f421f4b96ce80602a69d9214",
+      "size": 1743,
       "version": "1.0.0"
     },
     "commands/generate-types.asdm.md": {
-      "sha256": "d1b1401c495410ee68aedc055700cfb11794228d8f363bdf6463b75e58bdff20",
-      "size": 2259,
+      "sha256": "8aa134a07401fc4eb7c94a849d52b2aa2487729d7f949197d3d49d808a5fb95a",
+      "size": 2302,
       "version": "1.0.0"
     },
     "commands/scaffold-component.asdm.md": {
-      "sha256": "312cf07c16a44fe334037281213aed99d8410070acbfe35e6ae0968ec8a5263f",
-      "size": 2327,
+      "sha256": "57012a64be5ebc4d3952c5b0bd2bc2ecdb7e90a3ae4d1ce7badefd557383ffbf",
+      "size": 2370,
       "version": "1.0.0"
     },
     "commands/summarize.asdm.md": {
-      "sha256": "0f52ab9a25f6f802aa2a9025d8a4e9a5825aa04ba94173884bb189566ad07ad0",
-      "size": 1919,
+      "sha256": "067236fb242d3d4a00ace3e76c09a6e8bd79288e31c0e67273e950df410761c0",
+      "size": 1962,
       "version": "1.0.0"
     }
   }
