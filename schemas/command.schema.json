@@ -33,7 +33,11 @@
           "additionalProperties": true,
           "properties": {
             "slash_command": { "type": "string" },
-            "agent": { "type": "string" }
+            "agent": { "type": "string" },
+            "model": {
+              "type": "string",
+              "description": "Override the model used for this command"
+            }
           }
         },
         "claude-code": {

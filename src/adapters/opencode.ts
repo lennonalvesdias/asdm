@@ -78,13 +78,24 @@ function formatSkillContent(parsed: ParsedAsset): string {
   ].join('\n')
 }
 
-/** Format a command as an OpenCode command file */
+/** Format a command as an OpenCode command file with YAML frontmatter */
 function formatCommandContent(parsed: ParsedAsset): string {
-  return [
-    managedFileHeader(ADAPTER_NAME),
-    '',
-    parsed.body,
-  ].join('\n')
+  const headerLines = managedFileHeader(ADAPTER_NAME)
+    .split('\n')
+    // defensive: ensure all lines are non-empty YAML comments
+    .filter(l => l.length > 0)
+    .map(l => l.startsWith('#') ? l : `# ${l}`)
+    .join('\n')
+
+  const frontmatter: Record<string, unknown> = {
+    description: parsed.description,
+  }
+  if (parsed.providerConfig['model'] !== undefined) {
+    frontmatter['model'] = parsed.providerConfig['model']
+  }
+
+  const yamlBody = stringifyYaml(frontmatter)
+  return `---\n${headerLines}\n${yamlBody}---\n\n${parsed.body}`
 }
 
 /** Generate opencode.jsonc config — full passthrough of provider_config.opencode */

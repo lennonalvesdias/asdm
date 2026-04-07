@@ -8,6 +8,7 @@ providers:
   opencode:
     slash_command: /generate-types
     agent: architect
+    model: github-copilot/claude-haiku-4.5
   claude-code:
     slash_command: /generate-types
     agent: architect

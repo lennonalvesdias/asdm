@@ -8,6 +8,7 @@ providers:
   opencode:
     slash_command: /analyze-schema
     agent: data-analyst
+    model: github-copilot/claude-haiku-4.5
   claude-code:
     slash_command: /analyze-schema
     agent: data-analyst

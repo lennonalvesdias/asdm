@@ -8,6 +8,7 @@ providers:
   opencode:
     slash_command: /check-file
     agent: code-reviewer
+    model: github-copilot/claude-haiku-4.5
   claude-code:
     slash_command: /check-file
     agent: code-reviewer

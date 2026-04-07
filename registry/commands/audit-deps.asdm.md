@@ -8,6 +8,7 @@ providers:
   opencode:
     slash_command: /audit-deps
     agent: security-auditor
+    model: github-copilot/claude-haiku-4.5
   claude-code:
     slash_command: /audit-deps
     agent: security-auditor
