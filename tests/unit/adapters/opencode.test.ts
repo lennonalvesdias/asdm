@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import { parse as parseYaml } from 'yaml'
 import { createOpenCodeAdapter } from '../../../src/adapters/opencode.js'
 import type { ParsedAsset } from '../../../src/core/parser.js'
 import type { ResolvedProfile } from '../../../src/core/profile-resolver.js'
@@ -38,7 +39,7 @@ const SAMPLE_COMMAND: ParsedAsset = {
   version: '1.1.0',
   description: 'Inicia uma revisão de código no branch atual',
   frontmatter: { name: 'review', type: 'command', version: '1.1.0', description: 'desc' },
-  providerConfig: { slash_command: '/review', agent: 'code-reviewer' },
+  providerConfig: { slash_command: '/review', agent: 'code-reviewer', model: 'github-copilot/claude-haiku-4.5' },
   body: '# /review\n\nExecuta uma revisão completa.',
   sourcePath: 'commands/review.asdm.md',
   sha256: 'c'.repeat(64),
@@ -219,6 +220,70 @@ describe('OpenCodeAdapter', () => {
     it('emits to .opencode/commands/{name}.md', () => {
       const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
       expect(files[0]?.relativePath).toBe('.opencode/commands/review.md')
+    })
+
+    it('content starts with YAML frontmatter fence', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      expect(String(files[0]?.content)).toMatch(/^---\n/)
+    })
+
+    it('includes managed-file header as YAML comments inside frontmatter', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      const content = String(files[0]?.content)
+      expect(content).toContain('ASDM MANAGED FILE')
+      // Header must be inside the opening --- block, not before it
+      const firstFenceEnd = content.indexOf('\n---\n', 4)
+      const headerIdx = content.indexOf('ASDM MANAGED FILE')
+      expect(headerIdx).toBeGreaterThan(0)
+      expect(headerIdx).toBeLessThan(firstFenceEnd)
+    })
+
+    it('contains description field in frontmatter', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      expect(String(files[0]?.content)).toContain('description:')
+    })
+
+    it('contains model field in frontmatter when providerConfig has model', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      expect(String(files[0]?.content)).toContain('model: github-copilot/claude-haiku-4.5')
+    })
+
+    it('body content appears after the closing frontmatter fence', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      const content = String(files[0]?.content)
+      expect(content).toContain('---\n\n# /review')
+    })
+
+    it('omits model from frontmatter when providerConfig has no model', () => {
+      const commandWithoutModel: ParsedAsset = {
+        ...SAMPLE_COMMAND,
+        providerConfig: { slash_command: '/review', agent: 'code-reviewer' },
+      }
+      const files = adapter.emitCommand(commandWithoutModel, '/project')
+      const content = String(files[0]?.content)
+      expect(content).toContain('description:')
+      expect(content).not.toContain('model:')
+    })
+
+    it('sets correct sha256', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      expect(files[0]?.sha256).toHaveLength(64)
+    })
+
+    it('sets adapter name', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      expect(files[0]?.adapter).toBe('opencode')
+    })
+
+    it('generates parseable YAML frontmatter', () => {
+      const files = adapter.emitCommand(SAMPLE_COMMAND, '/project')
+      const content = String(files[0]?.content)
+      // Content is: ---\nheader comments\nfrontmatter\n---\n\nbody
+      // Split on '---' yields: ['', '\nheader+yaml\n', '\n\nbody']
+      const yamlBlock = content.split('---')[1]!
+      const result = parseYaml(yamlBlock)
+      expect(result).toHaveProperty('description')
+      expect(typeof result).toBe('object')
     })
   })
 
