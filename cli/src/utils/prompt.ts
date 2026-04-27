@@ -25,7 +25,7 @@ function renderOptions<T>(options: Array<PromptOption<T>>): void {
 
 function ask(rl: readline.Interface, prompt: string): Promise<string> {
   return new Promise(resolve => {
-    rl.question(prompt, answer => resolve(answer))
+    rl.question(prompt, (answer: string) => resolve(answer))
   })
 }
 
