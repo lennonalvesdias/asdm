@@ -176,8 +176,8 @@ pub async fn get_azure_user_profile(access_token: String) -> Result<UserProfile,
 
 fn generate_code_verifier() -> String {
     use rand::Rng;
-    let verifier: String = rand::thread_rng()
-        .sample_iter(&rand::distributions::Alphanumeric)
+    let verifier: String = rand::rng()
+        .sample_iter(rand::distr::Alphanumeric)
         .take(128)
         .map(char::from)
         .collect();
@@ -195,8 +195,8 @@ fn generate_code_challenge(verifier: &str) -> String {
 
 fn generate_state() -> String {
     use rand::Rng;
-    rand::thread_rng()
-        .sample_iter(&rand::distributions::Alphanumeric)
+    rand::rng()
+        .sample_iter(rand::distr::Alphanumeric)
         .take(32)
         .map(char::from)
         .collect()
