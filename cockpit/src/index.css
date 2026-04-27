@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors - Dark IDE theme */
+  --color-surface-900: #0d0d0f;
+  --color-surface-800: #141416;
+  --color-surface-700: #1c1c1f;
+  --color-surface-600: #242428;
+  --color-surface-500: #2e2e33;
+  --color-surface-400: #3a3a40;
+  --color-surface-300: #52525a;
+  --color-surface-200: #71717a;
+  --color-surface-100: #a1a1aa;
+  --color-surface-50: #e4e4e7;
+
+  --color-accent-300: #fad96b;
+  --color-accent-400: #f7ca40;
+  --color-accent-500: #f5c227;
+  --color-accent-600: #d4a414;
+
+  --color-success-500: #22c55e;
+  --color-success-400: #4ade80;
+  --color-warning-500: #f59e0b;
+  --color-warning-400: #fbbf24;
+  --color-danger-500: #ef4444;
+  --color-danger-400: #f87171;
+  --color-info-500: #3b82f6;
+  --color-info-400: #60a5fa;
+
+  /* Typography */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+
+  /* Radii */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 48px;
+  --titlebar-height: 38px;
+}
+
+html[data-theme="light"] {
+  --color-surface-900: #ffffff;
+  --color-surface-800: #f4f4f5;
+  --color-surface-700: #e4e4e7;
+  --color-surface-600: #d4d4d8;
+  --color-surface-500: #a1a1aa;
+  --color-surface-400: #71717a;
+  --color-surface-300: #52525b;
+  --color-surface-200: #3f3f46;
+  --color-surface-100: #27272a;
+  --color-surface-50: #18181b;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--color-surface-900);
+  color: var(--color-surface-50);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-500);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-surface-400);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent-500) 30%, transparent);
+  color: inherit;
+}
+
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+}
+[data-tauri-drag-region] button,
+[data-tauri-drag-region] a,
+[data-tauri-drag-region] input {
+  -webkit-app-region: no-drag;
+}
