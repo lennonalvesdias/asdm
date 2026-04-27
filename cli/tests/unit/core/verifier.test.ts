@@ -29,7 +29,7 @@ async function setupLockfile(files: Record<string, { content: string; source?: s
   
   for (const [relPath, { content, source }] of Object.entries(files)) {
     const sha256 = await createManagedFile(relPath, content)
-    lockFiles[relPath] = createLockEntry(sha256, source ?? 'agents/test.asdm.md', 'opencode', '1.0.0')
+    lockFiles[relPath] = createLockEntry(sha256, source ?? 'agents/test.md', 'opencode', '1.0.0')
   }
   
   await writeLockfile(tmpDir, buildLockfile({

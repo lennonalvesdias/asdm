@@ -59,7 +59,7 @@ function buildManifest(agentSha: string): AsdmManifest {
       },
     },
     assets: {
-      'agents/code-reviewer.asdm.md': {
+      'agents/code-reviewer.md': {
         sha256: agentSha,
         size: AGENT_CONTENT.length,
         version: '1.0.0',

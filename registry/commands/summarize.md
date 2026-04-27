@@ -50,7 +50,7 @@ For a **diff**: Describes what changed, why it likely changed (based on context)
 ```
 ## src/core/parser.ts
 
-Parses ASDM asset files (.asdm.md) from raw string content into structured ParsedAsset objects.
+Parses ASDM asset files (.md) from raw string content into structured ParsedAsset objects.
 
 **Exports:** `parseAsset(content, sourcePath, provider?)`
 

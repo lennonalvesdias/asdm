@@ -96,7 +96,7 @@ async function processAsdmFile(
 async function scanAgents(): Promise<[string, AssetEntry][]> {
   const agentsDir = join(REGISTRY_DIR, 'agents')
   const entries = await readdir(agentsDir, { withFileTypes: true })
-  const asdmFiles = entries.filter(e => e.isFile() && e.name.endsWith('.asdm.md'))
+  const asdmFiles = entries.filter(e => e.isFile() && e.name.endsWith('.md'))
 
   console.log(`  agents:   ${asdmFiles.length} file(s)`)
 
@@ -113,12 +113,12 @@ async function scanSkills(): Promise<[string, AssetEntry][]> {
   const results: [string, AssetEntry][] = []
 
   for (const dir of skillDirs) {
-    const skillFilePath = join(skillsDir, dir.name, 'SKILL.asdm.md')
-    const registryPath = `skills/${dir.name}/SKILL.asdm.md`
+    const skillFilePath = join(skillsDir, dir.name, 'SKILL.md')
+    const registryPath = `skills/${dir.name}/SKILL.md`
     try {
       results.push(await processAsdmFile(skillFilePath, registryPath))
     } catch {
-      console.warn(`  ⚠  No SKILL.asdm.md in skills/${dir.name} — skipping`)
+      console.warn(`  ⚠  No SKILL.md in skills/${dir.name} — skipping`)
     }
   }
 
@@ -129,7 +129,7 @@ async function scanSkills(): Promise<[string, AssetEntry][]> {
 async function scanCommands(): Promise<[string, AssetEntry][]> {
   const commandsDir = join(REGISTRY_DIR, 'commands')
   const entries = await readdir(commandsDir, { withFileTypes: true })
-  const asdmFiles = entries.filter(e => e.isFile() && e.name.endsWith('.asdm.md'))
+  const asdmFiles = entries.filter(e => e.isFile() && e.name.endsWith('.md'))
 
   console.log(`  commands: ${asdmFiles.length} file(s)`)
 

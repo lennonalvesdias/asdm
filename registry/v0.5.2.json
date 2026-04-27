@@ -223,102 +223,102 @@
     }
   },
   "assets": {
-    "agents/architect.asdm.md": {
+    "agents/architect.md": {
       "sha256": "e73bba2e7e220e7cdcaad12ecdcea385dbc13daa72c5253cd2e8b9e845ae14a3",
       "size": 3030,
       "version": "1.0.0"
     },
-    "agents/code-reviewer.asdm.md": {
+    "agents/code-reviewer.md": {
       "sha256": "c2bd0044cdb81400d84152e38a1de503be2ea14e81372cebaa8fa581ebdbce3d",
       "size": 2930,
       "version": "1.0.0"
     },
-    "agents/data-analyst.asdm.md": {
+    "agents/data-analyst.md": {
       "sha256": "883fbaaf2083c6410936ef4315d1ea08ea1d8a8a493f6cdb151d867159e8103e",
       "size": 2884,
       "version": "1.0.0"
     },
-    "agents/documentation-writer.asdm.md": {
+    "agents/documentation-writer.md": {
       "sha256": "909b13482d750b5890259e5e145b86bba5ccd53b81f21a6decdf31c57e3220d9",
       "size": 2807,
       "version": "1.0.0"
     },
-    "agents/mobile-engineer.asdm.md": {
+    "agents/mobile-engineer.md": {
       "sha256": "413a00c17b623df1ca259bdca8719585df7ce71a6006f8cd2b5fcb8c380935c1",
       "size": 2922,
       "version": "1.0.0"
     },
-    "agents/security-auditor.asdm.md": {
+    "agents/security-auditor.md": {
       "sha256": "7677c74b92ee3751f21b472dc122eddedb424ce3e191dbdb479f02ac6d8b2153",
       "size": 3186,
       "version": "1.0.0"
     },
-    "agents/test-engineer.asdm.md": {
+    "agents/test-engineer.md": {
       "sha256": "5af25cd63d2bac8cc48f01c902974796abed53139c6fedbf23725550ddc5b6ab",
       "size": 2830,
       "version": "1.0.0"
     },
-    "skills/api-design/SKILL.asdm.md": {
+    "skills/api-design/SKILL.md": {
       "sha256": "637fc8014c22ddd8fa9122a44eb68cef70ffecfed724e8535b8d7d54091c579c",
       "size": 3506,
       "version": "1.0.0"
     },
-    "skills/code-review/SKILL.asdm.md": {
+    "skills/code-review/SKILL.md": {
       "sha256": "de2011667b7f9e5c07cef878d43e85bb2d9fa2109c4ba64e161b6038012fab20",
       "size": 3112,
       "version": "1.0.0"
     },
-    "skills/data-pipeline/SKILL.asdm.md": {
+    "skills/data-pipeline/SKILL.md": {
       "sha256": "35e45153c4eafc4f1654b46865a226509634b3659365b03e19de482d10233699",
       "size": 3686,
       "version": "1.0.0"
     },
-    "skills/frontend-design/SKILL.asdm.md": {
+    "skills/frontend-design/SKILL.md": {
       "sha256": "9cdddedd6f2b6caa8bafb8f8fa9864b6473c89170c4feedd05aaa9f1a30a8d3f",
       "size": 3267,
       "version": "1.0.0"
     },
-    "skills/mobile-patterns/SKILL.asdm.md": {
+    "skills/mobile-patterns/SKILL.md": {
       "sha256": "9f336da4b1979cbdadad95012a4347f0e9830597f60e98e9084d6a0d07459acd",
       "size": 3561,
       "version": "1.0.0"
     },
-    "skills/plan-protocol/SKILL.asdm.md": {
+    "skills/plan-protocol/SKILL.md": {
       "sha256": "c0226a04e91caedc6dd9b51946508b9c05c29b51aa3402217c176161c0e7a16c",
       "size": 2781,
       "version": "1.0.0"
     },
-    "skills/threat-modeling/SKILL.asdm.md": {
+    "skills/threat-modeling/SKILL.md": {
       "sha256": "255ec1cc1773315b994bff8f09e647750210bc34f233c5ff83053fb6568f67e5",
       "size": 4256,
       "version": "1.0.0"
     },
-    "commands/analyze-schema.asdm.md": {
+    "commands/analyze-schema.md": {
       "sha256": "2c855b9b02257cecc71c5a03faa05da52e215df148aa141c9258db8e0d2b6174",
       "size": 2538,
       "version": "1.0.0"
     },
-    "commands/audit-deps.asdm.md": {
+    "commands/audit-deps.md": {
       "sha256": "b5d54e07d9596b996090aae8e83476fb2d53b62301dd3feef82facd3d08f7150",
       "size": 2781,
       "version": "1.0.0"
     },
-    "commands/check-file.asdm.md": {
+    "commands/check-file.md": {
       "sha256": "3090793fb1eb3484626f7a4c9569df87ff486586e2e3f4046c15749003a4af73",
       "size": 1700,
       "version": "1.0.0"
     },
-    "commands/generate-types.asdm.md": {
+    "commands/generate-types.md": {
       "sha256": "d1b1401c495410ee68aedc055700cfb11794228d8f363bdf6463b75e58bdff20",
       "size": 2259,
       "version": "1.0.0"
     },
-    "commands/scaffold-component.asdm.md": {
+    "commands/scaffold-component.md": {
       "sha256": "312cf07c16a44fe334037281213aed99d8410070acbfe35e6ae0968ec8a5263f",
       "size": 2327,
       "version": "1.0.0"
     },
-    "commands/summarize.asdm.md": {
+    "commands/summarize.md": {
       "sha256": "0f52ab9a25f6f802aa2a9025d8a4e9a5825aa04ba94173884bb189566ad07ad0",
       "size": 1919,
       "version": "1.0.0"

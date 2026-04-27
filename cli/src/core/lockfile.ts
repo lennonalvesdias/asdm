@@ -18,7 +18,7 @@ import { readJson, writeJson, exists } from '../utils/fs.js'
 
 export interface LockfileEntry {
   sha256: string
-  source: string      // Registry-relative path of source .asdm.md
+  source: string      // Registry-relative path of source .md
   adapter: string     // Adapter name: opencode, claude-code, copilot
   version: string     // Asset version from manifest
   managed: boolean    // true = managed by ASDM; false = overlay

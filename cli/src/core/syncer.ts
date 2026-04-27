@@ -263,7 +263,7 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
     for (const adapter of adapters) {
       // Emit agents
       for (const agentName of resolvedProfile.agents) {
-        const assetPath = `agents/${agentName}.asdm.md`
+        const assetPath = `agents/${agentName}.md`
         const content = downloadedAssets.get(assetPath)
         if (!content) continue
         
@@ -274,7 +274,7 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
       
       // Emit skills
       for (const skillName of resolvedProfile.skills) {
-        const assetPath = `skills/${skillName}/SKILL.asdm.md`
+        const assetPath = `skills/${skillName}/SKILL.md`
         const content = downloadedAssets.get(assetPath)
         if (!content) continue
         
@@ -285,7 +285,7 @@ export async function sync(options: SyncOptions): Promise<SyncResult> {
       
       // Emit commands
       for (const commandName of resolvedProfile.commands) {
-        const assetPath = `commands/${commandName}.asdm.md`
+        const assetPath = `commands/${commandName}.md`
         const content = downloadedAssets.get(assetPath)
         if (!content) continue
         

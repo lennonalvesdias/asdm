@@ -53,7 +53,7 @@ async function listInstalledCommands(cwd: string, asJson: boolean): Promise<void
   const commandSources = [...new Set(
     Object.values(lockfile.files)
       .filter(e => e.managed && e.source.startsWith('commands/'))
-      .map(e => e.source.replace('commands/', '').replace('.asdm.md', ''))
+      .map(e => e.source.replace('commands/', '').replace('.md', ''))
   )]
 
   if (asJson) {
@@ -105,7 +105,7 @@ async function listAvailableCommands(cwd: string, asJson: boolean): Promise<void
     }
 
     for (const cmd of resolved.commands) {
-      const assetKey = `commands/${cmd}.asdm.md`
+      const assetKey = `commands/${cmd}.md`
       const meta = manifest.assets[assetKey]
       const version = meta?.version ?? '?'
       logger.bullet(`/${cmd}  (v${version})`)

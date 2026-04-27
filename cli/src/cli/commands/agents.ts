@@ -53,7 +53,7 @@ async function listInstalledAgents(cwd: string, asJson: boolean): Promise<void> 
   const agentSources = [...new Set(
     Object.values(lockfile.files)
       .filter(e => e.managed && e.source.startsWith('agents/'))
-      .map(e => e.source.replace('agents/', '').replace('.asdm.md', ''))
+      .map(e => e.source.replace('agents/', '').replace('.md', ''))
   )]
 
   if (asJson) {
@@ -105,7 +105,7 @@ async function listAvailableAgents(cwd: string, asJson: boolean): Promise<void> 
     }
 
     for (const agent of resolved.agents) {
-      const assetKey = `agents/${agent}.asdm.md`
+      const assetKey = `agents/${agent}.md`
       const meta = manifest.assets[assetKey]
       const version = meta?.version ?? '?'
       logger.bullet(`${agent}  (v${version})`)

@@ -108,7 +108,7 @@ async function listAvailableSkills(cwd: string, asJson: boolean): Promise<void> 
     }
 
     for (const skill of resolved.skills) {
-      const assetKey = `skills/${skill}/SKILL.asdm.md`
+      const assetKey = `skills/${skill}/SKILL.md`
       const meta = manifest.assets[assetKey]
       const version = meta?.version ?? '?'
       logger.bullet(`${skill}  (v${version})`)

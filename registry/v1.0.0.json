@@ -49,102 +49,102 @@
     }
   },
   "assets": {
-    "agents/code-reviewer.asdm.md": {
+    "agents/code-reviewer.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "agents/documentation-writer.asdm.md": {
+    "agents/documentation-writer.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "agents/architect.asdm.md": {
+    "agents/architect.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "agents/test-engineer.asdm.md": {
+    "agents/test-engineer.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "agents/data-analyst.asdm.md": {
+    "agents/data-analyst.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "agents/mobile-engineer.asdm.md": {
+    "agents/mobile-engineer.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "agents/security-auditor.asdm.md": {
+    "agents/security-auditor.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "skills/plan-protocol/SKILL.asdm.md": {
+    "skills/plan-protocol/SKILL.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "skills/code-review/SKILL.asdm.md": {
+    "skills/code-review/SKILL.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "skills/frontend-design/SKILL.asdm.md": {
+    "skills/frontend-design/SKILL.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "skills/api-design/SKILL.asdm.md": {
+    "skills/api-design/SKILL.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "skills/data-pipeline/SKILL.asdm.md": {
+    "skills/data-pipeline/SKILL.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "skills/mobile-patterns/SKILL.asdm.md": {
+    "skills/mobile-patterns/SKILL.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "skills/threat-modeling/SKILL.asdm.md": {
+    "skills/threat-modeling/SKILL.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "commands/check-file.asdm.md": {
+    "commands/check-file.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "commands/summarize.asdm.md": {
+    "commands/summarize.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "commands/generate-types.asdm.md": {
+    "commands/generate-types.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "commands/scaffold-component.asdm.md": {
+    "commands/scaffold-component.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "commands/analyze-schema.asdm.md": {
+    "commands/analyze-schema.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"
     },
-    "commands/audit-deps.asdm.md": {
+    "commands/audit-deps.md": {
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "version": "1.0.0"

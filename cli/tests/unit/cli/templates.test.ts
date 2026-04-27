@@ -149,7 +149,7 @@ describe('writeTemplateFile', () => {
     const content = generateAgentTemplate('test-agent')
     await writeTemplateFile(tmpDir, 'test-agent', content, false)
 
-    const expectedPath = path.join(tmpDir, 'test-agent.asdm.md')
+    const expectedPath = path.join(tmpDir, 'test-agent.md')
     expect(await exists(expectedPath)).toBe(true)
   })
 
@@ -157,19 +157,19 @@ describe('writeTemplateFile', () => {
     const content = generateSkillTemplate('my-skill')
     await writeTemplateFile(tmpDir, 'my-skill', content, false)
 
-    const written = await fs.readFile(path.join(tmpDir, 'my-skill.asdm.md'), 'utf-8')
+    const written = await fs.readFile(path.join(tmpDir, 'my-skill.md'), 'utf-8')
     expect(written).toBe(content)
   })
 
   it('sets exit code 1 and does NOT overwrite when file exists and force=false', async () => {
     const originalContent = 'original content'
-    await fs.writeFile(path.join(tmpDir, 'existing.asdm.md'), originalContent, 'utf-8')
+    await fs.writeFile(path.join(tmpDir, 'existing.md'), originalContent, 'utf-8')
 
     const previousExitCode = process.exitCode
     await writeTemplateFile(tmpDir, 'existing', 'new content', false)
 
     // File should be unchanged
-    const still = await fs.readFile(path.join(tmpDir, 'existing.asdm.md'), 'utf-8')
+    const still = await fs.readFile(path.join(tmpDir, 'existing.md'), 'utf-8')
     expect(still).toBe(originalContent)
     expect(process.exitCode).toBe(1)
 
@@ -178,12 +178,12 @@ describe('writeTemplateFile', () => {
   })
 
   it('overwrites existing file when force=true', async () => {
-    await fs.writeFile(path.join(tmpDir, 'overwrite-me.asdm.md'), 'old content', 'utf-8')
+    await fs.writeFile(path.join(tmpDir, 'overwrite-me.md'), 'old content', 'utf-8')
 
     const newContent = generateCommandTemplate('overwrite-me')
     await writeTemplateFile(tmpDir, 'overwrite-me', newContent, true)
 
-    const written = await fs.readFile(path.join(tmpDir, 'overwrite-me.asdm.md'), 'utf-8')
+    const written = await fs.readFile(path.join(tmpDir, 'overwrite-me.md'), 'utf-8')
     expect(written).toBe(newContent)
   })
 
@@ -193,7 +193,7 @@ describe('writeTemplateFile', () => {
 
     await writeTemplateFile(nestedDir, 'nested-agent', content, false)
 
-    const expectedPath = path.join(nestedDir, 'nested-agent.asdm.md')
+    const expectedPath = path.join(nestedDir, 'nested-agent.md')
     expect(await exists(expectedPath)).toBe(true)
   })
 })

@@ -4,7 +4,7 @@
  * Unlike the unit tests (which test generate + write in isolation), these tests
  * verify the full round-trip: generate content → write to real filesystem →
  * read back → parse with parseAsset(). This confirms that every template
- * produces a syntactically valid .asdm.md file that ASDM's own parser accepts.
+ * produces a syntactically valid .md file that ASDM's own parser accepts.
  *
  * Scenarios:
  *   - All three asset types parse successfully through parseAsset()
@@ -45,12 +45,12 @@ describe('agent template — parse validity', () => {
   it('generates content that parseAsset() accepts without throwing', () => {
     const content = generateAgentTemplate('my-agent')
 
-    expect(() => parseAsset(content, 'agents/my-agent.asdm.md', 'opencode')).not.toThrow()
+    expect(() => parseAsset(content, 'agents/my-agent.md', 'opencode')).not.toThrow()
   })
 
   it('parsed asset has correct name, type, and version', () => {
     const content = generateAgentTemplate('my-agent')
-    const parsed = parseAsset(content, 'agents/my-agent.asdm.md', 'opencode')
+    const parsed = parseAsset(content, 'agents/my-agent.md', 'opencode')
 
     expect(parsed.name).toBe('my-agent')
     expect(parsed.type).toBe('agent')
@@ -59,7 +59,7 @@ describe('agent template — parse validity', () => {
 
   it('parsed asset has a non-empty description', () => {
     const content = generateAgentTemplate('my-agent')
-    const parsed = parseAsset(content, 'agents/my-agent.asdm.md', 'opencode')
+    const parsed = parseAsset(content, 'agents/my-agent.md', 'opencode')
 
     expect(typeof parsed.description).toBe('string')
     expect(parsed.description.length).toBeGreaterThan(0)
@@ -67,7 +67,7 @@ describe('agent template — parse validity', () => {
 
   it('parsed asset body contains the agent heading', () => {
     const content = generateAgentTemplate('my-agent')
-    const parsed = parseAsset(content, 'agents/my-agent.asdm.md', 'opencode')
+    const parsed = parseAsset(content, 'agents/my-agent.md', 'opencode')
 
     expect(parsed.body).toContain('# my-agent')
   })
@@ -76,7 +76,7 @@ describe('agent template — parse validity', () => {
     const content = generateAgentTemplate('my-agent')
     await writeTemplateFile(tmpDir, 'my-agent', content, false)
 
-    const written = await fs.readFile(path.join(tmpDir, 'my-agent.asdm.md'), 'utf-8')
+    const written = await fs.readFile(path.join(tmpDir, 'my-agent.md'), 'utf-8')
 
     expect(written).toBe(content)
   })
@@ -88,12 +88,12 @@ describe('skill template — parse validity', () => {
   it('generates content that parseAsset() accepts without throwing', () => {
     const content = generateSkillTemplate('my-skill')
 
-    expect(() => parseAsset(content, 'skills/my-skill/SKILL.asdm.md', 'opencode')).not.toThrow()
+    expect(() => parseAsset(content, 'skills/my-skill/SKILL.md', 'opencode')).not.toThrow()
   })
 
   it('parsed asset has correct name, type, and version', () => {
     const content = generateSkillTemplate('my-skill')
-    const parsed = parseAsset(content, 'skills/my-skill/SKILL.asdm.md', 'opencode')
+    const parsed = parseAsset(content, 'skills/my-skill/SKILL.md', 'opencode')
 
     expect(parsed.name).toBe('my-skill')
     expect(parsed.type).toBe('skill')
@@ -102,7 +102,7 @@ describe('skill template — parse validity', () => {
 
   it('parsed asset body contains Overview, Usage, and Examples sections', () => {
     const content = generateSkillTemplate('my-skill')
-    const parsed = parseAsset(content, 'skills/my-skill/SKILL.asdm.md', 'opencode')
+    const parsed = parseAsset(content, 'skills/my-skill/SKILL.md', 'opencode')
 
     expect(parsed.body).toContain('## Overview')
     expect(parsed.body).toContain('## Usage')
@@ -113,7 +113,7 @@ describe('skill template — parse validity', () => {
     const content = generateSkillTemplate('my-skill')
     await writeTemplateFile(tmpDir, 'my-skill', content, false)
 
-    const written = await fs.readFile(path.join(tmpDir, 'my-skill.asdm.md'), 'utf-8')
+    const written = await fs.readFile(path.join(tmpDir, 'my-skill.md'), 'utf-8')
 
     expect(written).toBe(content)
   })
@@ -125,12 +125,12 @@ describe('command template — parse validity', () => {
   it('generates content that parseAsset() accepts without throwing', () => {
     const content = generateCommandTemplate('my-command')
 
-    expect(() => parseAsset(content, 'commands/my-command.asdm.md', 'opencode')).not.toThrow()
+    expect(() => parseAsset(content, 'commands/my-command.md', 'opencode')).not.toThrow()
   })
 
   it('parsed asset has correct name, type, and version', () => {
     const content = generateCommandTemplate('my-command')
-    const parsed = parseAsset(content, 'commands/my-command.asdm.md', 'opencode')
+    const parsed = parseAsset(content, 'commands/my-command.md', 'opencode')
 
     expect(parsed.name).toBe('my-command')
     expect(parsed.type).toBe('command')
@@ -139,7 +139,7 @@ describe('command template — parse validity', () => {
 
   it('parsed asset body contains the slash-prefixed command heading', () => {
     const content = generateCommandTemplate('my-command')
-    const parsed = parseAsset(content, 'commands/my-command.asdm.md', 'opencode')
+    const parsed = parseAsset(content, 'commands/my-command.md', 'opencode')
 
     expect(parsed.body).toContain('# /my-command')
   })
@@ -148,7 +148,7 @@ describe('command template — parse validity', () => {
     const content = generateCommandTemplate('my-command')
     await writeTemplateFile(tmpDir, 'my-command', content, false)
 
-    const written = await fs.readFile(path.join(tmpDir, 'my-command.asdm.md'), 'utf-8')
+    const written = await fs.readFile(path.join(tmpDir, 'my-command.md'), 'utf-8')
 
     expect(written).toBe(content)
   })
@@ -162,9 +162,9 @@ describe('multiple templates in the same directory', () => {
     await writeTemplateFile(tmpDir, 'my-skill', generateSkillTemplate('my-skill'), false)
     await writeTemplateFile(tmpDir, 'my-command', generateCommandTemplate('my-command'), false)
 
-    expect(await exists(path.join(tmpDir, 'my-agent.asdm.md'))).toBe(true)
-    expect(await exists(path.join(tmpDir, 'my-skill.asdm.md'))).toBe(true)
-    expect(await exists(path.join(tmpDir, 'my-command.asdm.md'))).toBe(true)
+    expect(await exists(path.join(tmpDir, 'my-agent.md'))).toBe(true)
+    expect(await exists(path.join(tmpDir, 'my-skill.md'))).toBe(true)
+    expect(await exists(path.join(tmpDir, 'my-command.md'))).toBe(true)
   })
 
   it('each file contains type-specific content', async () => {
@@ -172,9 +172,9 @@ describe('multiple templates in the same directory', () => {
     await writeTemplateFile(tmpDir, 'b', generateSkillTemplate('b'), false)
     await writeTemplateFile(tmpDir, 'c', generateCommandTemplate('c'), false)
 
-    const agentContent = await fs.readFile(path.join(tmpDir, 'a.asdm.md'), 'utf-8')
-    const skillContent = await fs.readFile(path.join(tmpDir, 'b.asdm.md'), 'utf-8')
-    const commandContent = await fs.readFile(path.join(tmpDir, 'c.asdm.md'), 'utf-8')
+    const agentContent = await fs.readFile(path.join(tmpDir, 'a.md'), 'utf-8')
+    const skillContent = await fs.readFile(path.join(tmpDir, 'b.md'), 'utf-8')
+    const commandContent = await fs.readFile(path.join(tmpDir, 'c.md'), 'utf-8')
 
     expect(agentContent).toContain('type: agent')
     expect(skillContent).toContain('type: skill')
@@ -186,9 +186,9 @@ describe('multiple templates in the same directory', () => {
     const skillContent = generateSkillTemplate('b')
     const commandContent = generateCommandTemplate('c')
 
-    const agentParsed = parseAsset(agentContent, 'agents/a.asdm.md', 'opencode')
-    const skillParsed = parseAsset(skillContent, 'skills/b/SKILL.asdm.md', 'opencode')
-    const commandParsed = parseAsset(commandContent, 'commands/c.asdm.md', 'opencode')
+    const agentParsed = parseAsset(agentContent, 'agents/a.md', 'opencode')
+    const skillParsed = parseAsset(skillContent, 'skills/b/SKILL.md', 'opencode')
+    const commandParsed = parseAsset(commandContent, 'commands/c.md', 'opencode')
 
     expect(agentParsed.name).toBe('a')
     expect(skillParsed.name).toBe('b')
@@ -205,7 +205,7 @@ describe('writeTemplateFile — directory creation', () => {
 
     await writeTemplateFile(nestedDir, 'nested-agent', content, false)
 
-    expect(await exists(path.join(nestedDir, 'nested-agent.asdm.md'))).toBe(true)
+    expect(await exists(path.join(nestedDir, 'nested-agent.md'))).toBe(true)
   })
 })
 
@@ -213,23 +213,23 @@ describe('writeTemplateFile — directory creation', () => {
 
 describe('writeTemplateFile — force flag', () => {
   it('force=true overwrites an existing file with the new content', async () => {
-    await fs.writeFile(path.join(tmpDir, 'my-agent.asdm.md'), 'old content', 'utf-8')
+    await fs.writeFile(path.join(tmpDir, 'my-agent.md'), 'old content', 'utf-8')
 
     const newContent = generateAgentTemplate('my-agent')
     await writeTemplateFile(tmpDir, 'my-agent', newContent, true)
 
-    const written = await fs.readFile(path.join(tmpDir, 'my-agent.asdm.md'), 'utf-8')
+    const written = await fs.readFile(path.join(tmpDir, 'my-agent.md'), 'utf-8')
     expect(written).toBe(newContent)
   })
 
   it('force=false preserves an existing file and sets process.exitCode to 1', async () => {
     const originalContent = 'do not overwrite this'
-    await fs.writeFile(path.join(tmpDir, 'protected.asdm.md'), originalContent, 'utf-8')
+    await fs.writeFile(path.join(tmpDir, 'protected.md'), originalContent, 'utf-8')
 
     const prevExitCode = process.exitCode
     await writeTemplateFile(tmpDir, 'protected', 'new content', false)
 
-    const after = await fs.readFile(path.join(tmpDir, 'protected.asdm.md'), 'utf-8')
+    const after = await fs.readFile(path.join(tmpDir, 'protected.md'), 'utf-8')
     expect(after).toBe(originalContent)
     expect(process.exitCode).toBe(1)
 

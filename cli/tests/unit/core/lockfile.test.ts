@@ -23,7 +23,7 @@ afterEach(async () => {
 
 const SAMPLE_ENTRY = createLockEntry(
   'a'.repeat(64),
-  'agents/code-reviewer.asdm.md',
+  'agents/code-reviewer.md',
   'opencode',
   '1.0.0'
 )

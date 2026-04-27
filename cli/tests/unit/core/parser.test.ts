@@ -28,7 +28,7 @@ Você é um code reviewer sênior.
 
 describe('parseAsset', () => {
   it('parses a valid agent', () => {
-    const asset = parseAsset(VALID_AGENT, 'agents/code-reviewer.asdm.md', 'opencode')
+    const asset = parseAsset(VALID_AGENT, 'agents/code-reviewer.md', 'opencode')
     expect(asset.name).toBe('code-reviewer')
     expect(asset.type).toBe('agent')
     expect(asset.version).toBe('1.3.0')
@@ -36,7 +36,7 @@ describe('parseAsset', () => {
   })
 
   it('extracts provider-specific config', () => {
-    const asset = parseAsset(VALID_AGENT, 'agents/code-reviewer.asdm.md', 'opencode')
+    const asset = parseAsset(VALID_AGENT, 'agents/code-reviewer.md', 'opencode')
     expect(asset.providerConfig).toMatchObject({
       model: 'anthropic/claude-sonnet-4',
       permissions: ['read', 'write'],
@@ -44,25 +44,25 @@ describe('parseAsset', () => {
   })
 
   it('extracts claude-code provider config', () => {
-    const asset = parseAsset(VALID_AGENT, 'agents/code-reviewer.asdm.md', 'claude-code')
+    const asset = parseAsset(VALID_AGENT, 'agents/code-reviewer.md', 'claude-code')
     expect(asset.providerConfig).toMatchObject({
       model: 'claude-sonnet-4-20250514',
     })
   })
 
   it('returns empty providerConfig for unknown provider', () => {
-    const asset = parseAsset(VALID_AGENT, 'agents/code-reviewer.asdm.md', 'cursor')
+    const asset = parseAsset(VALID_AGENT, 'agents/code-reviewer.md', 'cursor')
     expect(asset.providerConfig).toEqual({})
   })
 
   it('computes sha256', () => {
-    const asset = parseAsset(VALID_AGENT, 'test.asdm.md')
+    const asset = parseAsset(VALID_AGENT, 'test.md')
     expect(asset.sha256).toHaveLength(64)
     expect(asset.sha256).toMatch(/^[a-f0-9]+$/)
   })
 
   it('throws ParseError for missing frontmatter', () => {
-    expect(() => parseAsset('no frontmatter here', 'test.asdm.md')).toThrow(ParseError)
+    expect(() => parseAsset('no frontmatter here', 'test.md')).toThrow(ParseError)
   })
 
   it('throws ParseError for missing name', () => {
@@ -73,7 +73,7 @@ version: 1.0.0
 ---
 body
 `
-    expect(() => parseAsset(bad, 'test.asdm.md')).toThrow(ParseError)
+    expect(() => parseAsset(bad, 'test.md')).toThrow(ParseError)
   })
 
   it('throws ParseError for invalid type', () => {
@@ -85,6 +85,6 @@ version: 1.0.0
 ---
 body
 `
-    expect(() => parseAsset(bad, 'test.asdm.md')).toThrow(ParseError)
+    expect(() => parseAsset(bad, 'test.md')).toThrow(ParseError)
   })
 })

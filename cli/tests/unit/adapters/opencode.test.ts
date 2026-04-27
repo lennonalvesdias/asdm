@@ -17,7 +17,7 @@ const SAMPLE_AGENT: ParsedAsset = {
     tools: ['bash', 'glob', 'grep'],
   },
   body: '# Code Reviewer\n\nVocê é um code reviewer sênior.',
-  sourcePath: 'agents/code-reviewer.asdm.md',
+  sourcePath: 'agents/code-reviewer.md',
   sha256: 'a'.repeat(64),
 }
 
@@ -29,7 +29,7 @@ const SAMPLE_SKILL: ParsedAsset = {
   frontmatter: { name: 'react-best-practices', type: 'skill', version: '2.0.0', description: 'desc' },
   providerConfig: { location: 'skills/react-best-practices/' },
   body: '# React Best Practices\n\nUse functional components.',
-  sourcePath: 'skills/react-best-practices/SKILL.asdm.md',
+  sourcePath: 'skills/react-best-practices/SKILL.md',
   sha256: 'b'.repeat(64),
 }
 
@@ -41,7 +41,7 @@ const SAMPLE_COMMAND: ParsedAsset = {
   frontmatter: { name: 'review', type: 'command', version: '1.1.0', description: 'desc' },
   providerConfig: { slash_command: '/review', agent: 'code-reviewer', model: 'github-copilot/claude-haiku-4.5' },
   body: '# /review\n\nExecuta uma revisão completa.',
-  sourcePath: 'commands/review.asdm.md',
+  sourcePath: 'commands/review.md',
   sha256: 'c'.repeat(64),
 }
 
@@ -132,7 +132,7 @@ describe('OpenCodeAdapter', () => {
 
     it('sets sourcePath', () => {
       const files = adapter.emitAgent(SAMPLE_AGENT, '/project')
-      expect(files[0]?.sourcePath).toBe('agents/code-reviewer.asdm.md')
+      expect(files[0]?.sourcePath).toBe('agents/code-reviewer.md')
     })
 
     it('defaults mode to subagent when providerConfig has no mode', () => {

@@ -17,7 +17,7 @@ const MINIMAL_MANIFEST: AsdmManifest = {
     base: { agents: ['code-reviewer'], skills: [], commands: [] },
   },
   assets: {
-    'agents/code-reviewer.asdm.md': {
+    'agents/code-reviewer.md': {
       sha256: 'abc123',
       size: 100,
       version: '1.0.0',
@@ -46,7 +46,7 @@ describe('FileRegistryClient.getLatestManifest()', () => {
     const manifest = await client.getLatestManifest()
     expect(manifest.version).toBe('1.0.0')
     expect(manifest.policy.allowed_profiles).toEqual(['base'])
-    expect(manifest.assets['agents/code-reviewer.asdm.md']?.sha256).toBe('abc123')
+    expect(manifest.assets['agents/code-reviewer.md']?.sha256).toBe('abc123')
   })
 
   it('throws RegistryError when latest.json does not exist', async () => {
@@ -60,19 +60,19 @@ describe('FileRegistryClient.downloadAsset()', () => {
     const agentsDir = path.join(tmpDir, 'agents')
     await fs.mkdir(agentsDir, { recursive: true })
     await fs.writeFile(
-      path.join(agentsDir, 'code-reviewer.asdm.md'),
+      path.join(agentsDir, 'code-reviewer.md'),
       '# Code Reviewer\nAgent content here.',
       'utf-8'
     )
     const client = new FileRegistryClient(tmpDir)
-    const content = await client.downloadAsset('agents/code-reviewer.asdm.md', '1.0.0')
+    const content = await client.downloadAsset('agents/code-reviewer.md', '1.0.0')
     expect(content).toBe('# Code Reviewer\nAgent content here.')
   })
 
   it('throws RegistryError when asset file does not exist', async () => {
     const client = new FileRegistryClient(tmpDir)
     await expect(
-      client.downloadAsset('agents/nonexistent.asdm.md', '1.0.0')
+      client.downloadAsset('agents/nonexistent.md', '1.0.0')
     ).rejects.toThrow(RegistryError)
   })
 

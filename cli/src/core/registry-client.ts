@@ -219,7 +219,7 @@ export class RegistryClient {
   /**
    * Download a specific asset file from the registry via raw GitHub content.
    *
-   * @param assetPath - Registry-relative path (e.g., "agents/code-reviewer.asdm.md")
+   * @param assetPath - Registry-relative path (e.g., "agents/code-reviewer.md")
    * @param version - Release tag version (e.g., "1.0.0")
    */
   async downloadAsset(assetPath: string, version: string): Promise<string> {

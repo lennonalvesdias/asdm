@@ -1,7 +1,7 @@
 /**
- * Parser for canonical ASDM format (.asdm.md files).
+ * Parser for canonical ASDM format (.md files).
  *
- * Each .asdm.md file has:
+ * Each .md file has:
  *   - YAML frontmatter between --- delimiters
  *   - Markdown body with agent/skill/command instructions
  */
@@ -27,7 +27,7 @@ export interface ParsedAsset {
 const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/
 
 /**
- * Parse a .asdm.md file content into a structured ParsedAsset.
+ * Parse a .md file content into a structured ParsedAsset.
  *
  * @param content - Raw file content (frontmatter + markdown body)
  * @param sourcePath - Relative path of the source file (for error messages)
@@ -99,7 +99,7 @@ export function parseAsset(
 }
 
 /**
- * Serialize frontmatter and body back to .asdm.md format.
+ * Serialize frontmatter and body back to .md format.
  * Useful for tests and round-trip verification.
  */
 export function serializeAsset(frontmatter: Record<string, unknown>, body: string): string {

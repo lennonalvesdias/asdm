@@ -1,10 +1,10 @@
 /**
- * asdm templates — Scaffold new .asdm.md asset files from built-in templates.
+ * asdm templates — Scaffold new .md asset files from built-in templates.
  *
  * Sub-commands:
- *   agent    Scaffold an agent definition (.asdm.md)
- *   skill    Scaffold a skill definition (.asdm.md)
- *   command  Scaffold a slash-command definition (.asdm.md)
+ *   agent    Scaffold an agent definition (.md)
+ *   skill    Scaffold a skill definition (.md)
+ *   command  Scaffold a slash-command definition (.md)
  *
  * Arguments:
  *   <name>             Required. The asset identifier (used in frontmatter and filename)
@@ -23,7 +23,7 @@ import { logger } from '../../utils/logger.js'
 // Template generators — exported for unit tests
 // ─────────────────────────────────────────────
 
-/** Generate frontmatter + body for an agent `.asdm.md` file */
+/** Generate frontmatter + body for an agent `.md` file */
 export function generateAgentTemplate(name: string): string {
   return `---
 name: ${name}
@@ -64,7 +64,7 @@ Describe the agent's primary responsibility here.
 `
 }
 
-/** Generate frontmatter + body for a skill `.asdm.md` file */
+/** Generate frontmatter + body for a skill `.md` file */
 export function generateSkillTemplate(name: string): string {
   return `---
 name: ${name}
@@ -89,7 +89,7 @@ How to use this skill.
 `
 }
 
-/** Generate frontmatter + body for a command `.asdm.md` file */
+/** Generate frontmatter + body for a command `.md` file */
 export function generateCommandTemplate(name: string): string {
   return `---
 name: ${name}
@@ -124,7 +124,7 @@ export async function writeTemplateFile(
   content: string,
   force: boolean,
 ): Promise<void> {
-  const filePath = path.join(outputDir, `${name}.asdm.md`)
+  const filePath = path.join(outputDir, `${name}.md`)
   const alreadyExists = await exists(filePath)
 
   if (alreadyExists && !force) {
@@ -147,7 +147,7 @@ export async function writeTemplateFile(
 const agentCommand = defineCommand({
   meta: {
     name: 'agent',
-    description: 'Scaffold an agent definition (.asdm.md)',
+    description: 'Scaffold an agent definition (.md)',
   },
   args: {
     name: {
@@ -175,7 +175,7 @@ const agentCommand = defineCommand({
 const skillCommand = defineCommand({
   meta: {
     name: 'skill',
-    description: 'Scaffold a skill definition (.asdm.md)',
+    description: 'Scaffold a skill definition (.md)',
   },
   args: {
     name: {
@@ -203,7 +203,7 @@ const skillCommand = defineCommand({
 const commandCommand = defineCommand({
   meta: {
     name: 'command',
-    description: 'Scaffold a slash-command definition (.asdm.md)',
+    description: 'Scaffold a slash-command definition (.md)',
   },
   args: {
     name: {
@@ -235,7 +235,7 @@ const commandCommand = defineCommand({
 export default defineCommand({
   meta: {
     name: 'templates',
-    description: 'Scaffold new .asdm.md asset files from built-in templates',
+    description: 'Scaffold new .md asset files from built-in templates',
   },
   subCommands: {
     agent: agentCommand,

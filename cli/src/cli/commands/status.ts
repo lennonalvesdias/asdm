@@ -57,9 +57,9 @@ export default defineCommand({
 
     const syncedAt = new Date(lockfile.synced_at).toLocaleString()
     const managedFiles = Object.entries(lockfile.files).filter(([, e]) => e.managed)
-    const agents = [...new Set(managedFiles.filter(([, e]) => e.source.startsWith('agents/')).map(([, e]) => e.source.replace('agents/', '').replace('.asdm.md', '')))]
-    const skills = [...new Set(managedFiles.filter(([, e]) => e.source.startsWith('skills/')).map(([, e]) => e.source.replace('skills/', '').replace('/SKILL.asdm.md', '')))]
-    const commands = [...new Set(managedFiles.filter(([, e]) => e.source.startsWith('commands/')).map(([, e]) => e.source.replace('commands/', '').replace('.asdm.md', '')))]
+    const agents = [...new Set(managedFiles.filter(([, e]) => e.source.startsWith('agents/')).map(([, e]) => e.source.replace('agents/', '').replace('.md', '')))]
+    const skills = [...new Set(managedFiles.filter(([, e]) => e.source.startsWith('skills/')).map(([, e]) => e.source.replace('skills/', '').replace('/SKILL.md', '')))]
+    const commands = [...new Set(managedFiles.filter(([, e]) => e.source.startsWith('commands/')).map(([, e]) => e.source.replace('commands/', '').replace('.md', '')))]
 
     logger.table([
       ['Last synced', syncedAt],

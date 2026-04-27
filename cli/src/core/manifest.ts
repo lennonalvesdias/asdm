@@ -95,17 +95,17 @@ export function getProfileAssetPaths(
   const paths: string[] = []
 
   for (const name of agentNames) {
-    const path = `agents/${name}.asdm.md`
+    const path = `agents/${name}.md`
     if (manifest.assets[path]) paths.push(path)
   }
 
   for (const name of skillNames) {
-    const path = `skills/${name}/SKILL.asdm.md`
+    const path = `skills/${name}/SKILL.md`
     if (manifest.assets[path]) paths.push(path)
   }
 
   for (const name of commandNames) {
-    const path = `commands/${name}.asdm.md`
+    const path = `commands/${name}.md`
     if (manifest.assets[path]) paths.push(path)
   }
 

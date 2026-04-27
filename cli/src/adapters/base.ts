@@ -1,7 +1,7 @@
 /**
  * ASDM Emit Adapter — Base Interface and Shared Helpers
  * 
- * Each adapter converts canonical .asdm.md assets into provider-native
+ * Each adapter converts canonical .md assets into provider-native
  * file formats. The interface is simple and composable.
  */
 
@@ -16,19 +16,19 @@ export interface EmittedFile {
   content: string | Buffer
   sha256: string
   adapter: string         // Adapter name (e.g., "opencode", "claude-code")
-  sourcePath: string      // Registry-relative source (e.g., "agents/code-reviewer.asdm.md")
+  sourcePath: string      // Registry-relative source (e.g., "agents/code-reviewer.md")
 }
 
 export interface EmitAdapter {
   readonly name: string
 
-  /** Convert a canonical agent .asdm.md to provider-native format */
+  /** Convert a canonical agent .md to provider-native format */
   emitAgent(parsed: ParsedAsset, targetDir: string): EmittedFile[]
 
-  /** Convert a canonical skill .asdm.md to provider-native format */
+  /** Convert a canonical skill .md to provider-native format */
   emitSkill(parsed: ParsedAsset, targetDir: string): EmittedFile[]
 
-  /** Convert a canonical command .asdm.md to provider-native format */
+  /** Convert a canonical command .md to provider-native format */
   emitCommand(parsed: ParsedAsset, targetDir: string): EmittedFile[]
 
   /**

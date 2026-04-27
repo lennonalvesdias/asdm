@@ -35,12 +35,12 @@ interface CheckResult {
   detail?: string
 }
 
-/** Extract agent names from lockfile sources (e.g. "agents/code-reviewer.asdm.md" → "code-reviewer"). */
+/** Extract agent names from lockfile sources (e.g. "agents/code-reviewer.md" → "code-reviewer"). */
 function extractAgentNamesFromLockfile(lockfile: AsdmLockfile): Set<string> {
   const names = new Set<string>()
   for (const entry of Object.values(lockfile.files)) {
-    if (entry.source.startsWith('agents/') && entry.source.endsWith('.asdm.md')) {
-      const name = entry.source.slice('agents/'.length, -'.asdm.md'.length)
+    if (entry.source.startsWith('agents/') && entry.source.endsWith('.md')) {
+      const name = entry.source.slice('agents/'.length, -'.md'.length)
       names.add(name)
     }
   }

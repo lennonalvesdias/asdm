@@ -10,7 +10,7 @@
   "files": {
     ".opencode/agents/code-reviewer.md": {
       "sha256": "abc123def456abc123def456abc123def456abc123def456abc123def456abc1",
-      "source": "agents/code-reviewer.asdm.md",
+      "source": "agents/code-reviewer.md",
       "adapter": "opencode",
       "version": "1.3.0",
       "managed": true
