@@ -18,10 +18,7 @@ export function MainPanel() {
 
   return (
     <div className="h-full overflow-hidden">
-      {activeView === "sprint" && <SprintView />}
       {activeView === "my-tasks" && <SprintView filterMyTasks />}
-      {activeView === "board" && <SprintView />}
-      {activeView === "team" && <DashboardView />}
       {activeView === "dashboard" && <DashboardView />}
       {activeView === "settings" && <SettingsView />}
       {activeView === "workflow" && <SettingsView />}
