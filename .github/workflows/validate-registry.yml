@@ -5,26 +5,31 @@ on:
     branches:
       - main
     paths:
-      - 'registry/**'
-      - 'schemas/**'
-      - 'scripts/**'
+      - 'cli/registry/**'
+      - 'cli/schemas/**'
+      - 'cli/scripts/**'
+      - '.github/workflows/validate-registry.yml'
   workflow_dispatch:
 
 jobs:
   validate:
     name: Validate Registry Assets
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cli
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
+          cache-dependency-path: cli/package-lock.json
       - run: npm ci
       - name: Build manifest
-        run: npx tsx scripts/build-manifest.ts
+        run: npm run build:manifest
       - name: Validate registry
-        run: npx tsx scripts/validate.ts
+        run: npm run validate:registry
       - name: Check for uncommitted manifest changes
         run: |
           if ! git diff --exit-code registry/; then

@@ -1,4 +1,4 @@
-name: Publish
+name: CLI Publish
 
 on:
   push:
@@ -9,9 +9,12 @@ jobs:
   publish:
     name: Create release and publish to npm
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cli
     permissions:
-      contents: write   # needed to create release and upload assets
-      id-token: write   # for npm provenance
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -19,6 +22,7 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
+          cache-dependency-path: cli/package-lock.json
           registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
@@ -27,7 +31,7 @@ jobs:
         run: npm test
 
       - name: Build manifest
-        run: npx tsx scripts/build-manifest.ts
+        run: npm run build:manifest
 
       - name: Build
         run: npm run build
