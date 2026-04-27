@@ -47,7 +47,7 @@ describe('sync with configPath option', () => {
     // If it reads from configPath it will fail later (registry unreachable) with a non-ConfigError
     const err = await sync({ cwd: tmpDir, configPath }).catch((e: unknown) => e)
     expect(err).not.toBeInstanceOf(ConfigError)
-  })
+  }, 30_000)
 
   it('throws ConfigError for invalid config JSON at configPath (missing registry)', async () => {
     const configPath = path.join(tmpDir, 'bad-config.json')
