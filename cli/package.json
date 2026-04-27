@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "citty": "^0.1.6",
+    "opencode-ai": "^1.14.26",
     "yaml": "^2.7.0"
   },
   "devDependencies": {
