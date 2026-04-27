@@ -1,0 +1,327 @@
+{
+  "$schema": "https://asdm.dev/schemas/manifest.schema.json",
+  "version": "0.6.1",
+  "policy": {
+    "locked_fields": [
+      "telemetry",
+      "install_hooks",
+      "auto_verify"
+    ],
+    "telemetry": true,
+    "auto_verify": true,
+    "install_hooks": true,
+    "allowed_profiles": [
+      "base",
+      "fullstack-engineer",
+      "data-analytics",
+      "mobile",
+      "security"
+    ],
+    "allowed_providers": [
+      "opencode",
+      "claude-code",
+      "copilot",
+      "agents-dir"
+    ],
+    "min_cli_version": "0.6.1"
+  },
+  "profiles": {
+    "base": {
+      "agents": [
+        "code-reviewer",
+        "documentation-writer"
+      ],
+      "skills": [
+        "plan-protocol",
+        "code-review"
+      ],
+      "commands": [
+        "check-file",
+        "summarize"
+      ],
+      "providers": [
+        "opencode",
+        "claude-code",
+        "copilot",
+        "agents-dir"
+      ],
+      "provider_config": {
+        "opencode": {
+          "model": "github-copilot/claude-sonnet-4.6",
+          "small_model": "github-copilot/claude-haiku-4.5",
+          "agent": {
+            "plan": {
+              "model": "github-copilot/claude-opus-4.6",
+              "temperature": 0.3,
+              "reasoningEffort": "high",
+              "textVerbosity": "low",
+              "permission": {
+                "edit": "deny",
+                "write": "deny",
+                "bash": {
+                  "*": "deny"
+                },
+                "task": "allow"
+              }
+            },
+            "build": {
+              "model": "github-copilot/claude-sonnet-4.6",
+              "temperature": 0.3,
+              "reasoningEffort": "medium",
+              "textVerbosity": "low",
+              "permission": {
+                "edit": "deny",
+                "write": "deny",
+                "bash": {
+                  "*": "deny"
+                },
+                "task": "allow"
+              }
+            }
+          },
+          "permission": {
+            "task": "deny",
+            "webfetch": "deny"
+          },
+          "plugin": [
+            "@tarquinen/opencode-dcp@1.2.7",
+            "@franlol/opencode-md-table-formatter@0.0.3",
+            "@plannotator/opencode@latest"
+          ]
+        }
+      }
+    },
+    "data-analytics": {
+      "extends": [
+        "base"
+      ],
+      "agents": [
+        "code-reviewer",
+        "data-analyst",
+        "documentation-writer"
+      ],
+      "skills": [
+        "plan-protocol",
+        "code-review",
+        "data-pipeline"
+      ],
+      "commands": [
+        "check-file",
+        "summarize",
+        "analyze-schema"
+      ],
+      "providers": [
+        "opencode",
+        "claude-code",
+        "copilot"
+      ]
+    },
+    "fullstack-engineer": {
+      "extends": [
+        "base"
+      ],
+      "agents": [
+        "code-reviewer",
+        "documentation-writer",
+        "architect",
+        "test-engineer"
+      ],
+      "skills": [
+        "plan-protocol",
+        "code-review",
+        "frontend-design",
+        "api-design"
+      ],
+      "commands": [
+        "check-file",
+        "summarize",
+        "generate-types",
+        "scaffold-component"
+      ],
+      "providers": [
+        "opencode",
+        "claude-code",
+        "copilot"
+      ],
+      "provider_config": {
+        "opencode": {
+          "theme": "dark",
+          "mcp": {
+            "context7": {
+              "type": "remote",
+              "url": "https://mcp.context7.com/mcp",
+              "enabled": true
+            },
+            "exa": {
+              "type": "remote",
+              "url": "https://mcp.exa.ai/mcp",
+              "enabled": true
+            }
+          }
+        },
+        "claude-code": {
+          "permissions": {
+            "allow": [
+              "Read(**)",
+              "Write(src/**)",
+              "Bash(npm test)",
+              "Bash(npm run build)"
+            ]
+          }
+        }
+      }
+    },
+    "mobile": {
+      "extends": [
+        "base"
+      ],
+      "agents": [
+        "code-reviewer",
+        "documentation-writer",
+        "mobile-engineer"
+      ],
+      "skills": [
+        "plan-protocol",
+        "code-review",
+        "mobile-patterns"
+      ],
+      "commands": [
+        "check-file",
+        "summarize",
+        "scaffold-component"
+      ],
+      "providers": [
+        "opencode",
+        "claude-code",
+        "copilot"
+      ]
+    },
+    "security": {
+      "extends": [
+        "base"
+      ],
+      "agents": [
+        "code-reviewer",
+        "security-auditor",
+        "documentation-writer"
+      ],
+      "skills": [
+        "plan-protocol",
+        "code-review",
+        "threat-modeling"
+      ],
+      "commands": [
+        "check-file",
+        "summarize",
+        "audit-deps"
+      ],
+      "providers": [
+        "opencode",
+        "claude-code",
+        "copilot"
+      ]
+    }
+  },
+  "assets": {
+    "agents/architect.asdm.md": {
+      "sha256": "e73bba2e7e220e7cdcaad12ecdcea385dbc13daa72c5253cd2e8b9e845ae14a3",
+      "size": 3030,
+      "version": "1.0.0"
+    },
+    "agents/code-reviewer.asdm.md": {
+      "sha256": "c2bd0044cdb81400d84152e38a1de503be2ea14e81372cebaa8fa581ebdbce3d",
+      "size": 2930,
+      "version": "1.0.0"
+    },
+    "agents/data-analyst.asdm.md": {
+      "sha256": "883fbaaf2083c6410936ef4315d1ea08ea1d8a8a493f6cdb151d867159e8103e",
+      "size": 2884,
+      "version": "1.0.0"
+    },
+    "agents/documentation-writer.asdm.md": {
+      "sha256": "909b13482d750b5890259e5e145b86bba5ccd53b81f21a6decdf31c57e3220d9",
+      "size": 2807,
+      "version": "1.0.0"
+    },
+    "agents/mobile-engineer.asdm.md": {
+      "sha256": "413a00c17b623df1ca259bdca8719585df7ce71a6006f8cd2b5fcb8c380935c1",
+      "size": 2922,
+      "version": "1.0.0"
+    },
+    "agents/security-auditor.asdm.md": {
+      "sha256": "7677c74b92ee3751f21b472dc122eddedb424ce3e191dbdb479f02ac6d8b2153",
+      "size": 3186,
+      "version": "1.0.0"
+    },
+    "agents/test-engineer.asdm.md": {
+      "sha256": "5af25cd63d2bac8cc48f01c902974796abed53139c6fedbf23725550ddc5b6ab",
+      "size": 2830,
+      "version": "1.0.0"
+    },
+    "skills/api-design/SKILL.asdm.md": {
+      "sha256": "637fc8014c22ddd8fa9122a44eb68cef70ffecfed724e8535b8d7d54091c579c",
+      "size": 3506,
+      "version": "1.0.0"
+    },
+    "skills/code-review/SKILL.asdm.md": {
+      "sha256": "de2011667b7f9e5c07cef878d43e85bb2d9fa2109c4ba64e161b6038012fab20",
+      "size": 3112,
+      "version": "1.0.0"
+    },
+    "skills/data-pipeline/SKILL.asdm.md": {
+      "sha256": "35e45153c4eafc4f1654b46865a226509634b3659365b03e19de482d10233699",
+      "size": 3686,
+      "version": "1.0.0"
+    },
+    "skills/frontend-design/SKILL.asdm.md": {
+      "sha256": "9cdddedd6f2b6caa8bafb8f8fa9864b6473c89170c4feedd05aaa9f1a30a8d3f",
+      "size": 3267,
+      "version": "1.0.0"
+    },
+    "skills/mobile-patterns/SKILL.asdm.md": {
+      "sha256": "9f336da4b1979cbdadad95012a4347f0e9830597f60e98e9084d6a0d07459acd",
+      "size": 3561,
+      "version": "1.0.0"
+    },
+    "skills/plan-protocol/SKILL.asdm.md": {
+      "sha256": "c0226a04e91caedc6dd9b51946508b9c05c29b51aa3402217c176161c0e7a16c",
+      "size": 2781,
+      "version": "1.0.0"
+    },
+    "skills/threat-modeling/SKILL.asdm.md": {
+      "sha256": "255ec1cc1773315b994bff8f09e647750210bc34f233c5ff83053fb6568f67e5",
+      "size": 4256,
+      "version": "1.0.0"
+    },
+    "commands/analyze-schema.asdm.md": {
+      "sha256": "541e9a8f5ff6efd05742f34a7342f2d4443acbdd52dfc7677e40b47cc318b321",
+      "size": 2581,
+      "version": "1.0.0"
+    },
+    "commands/audit-deps.asdm.md": {
+      "sha256": "fd364230778974ab29ce74b6d7964660b088987dda49184bfe170703ea1a08c0",
+      "size": 2824,
+      "version": "1.0.0"
+    },
+    "commands/check-file.asdm.md": {
+      "sha256": "54470ed36f2e7d05f85db7dcfdc8e2bcb4fee568f421f4b96ce80602a69d9214",
+      "size": 1743,
+      "version": "1.0.0"
+    },
+    "commands/generate-types.asdm.md": {
+      "sha256": "8aa134a07401fc4eb7c94a849d52b2aa2487729d7f949197d3d49d808a5fb95a",
+      "size": 2302,
+      "version": "1.0.0"
+    },
+    "commands/scaffold-component.asdm.md": {
+      "sha256": "57012a64be5ebc4d3952c5b0bd2bc2ecdb7e90a3ae4d1ce7badefd557383ffbf",
+      "size": 2370,
+      "version": "1.0.0"
+    },
+    "commands/summarize.asdm.md": {
+      "sha256": "067236fb242d3d4a00ace3e76c09a6e8bd79288e31c0e67273e950df410761c0",
+      "size": 1962,
+      "version": "1.0.0"
+    }
+  }
+}

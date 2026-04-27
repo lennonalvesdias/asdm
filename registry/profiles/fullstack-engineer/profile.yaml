@@ -1,0 +1,47 @@
+name: fullstack-engineer
+description: "Full-stack web development profile"
+extends:
+  - base
+
+agents:
+  - code-reviewer
+  - documentation-writer
+  - architect
+  - test-engineer
+
+skills:
+  - plan-protocol
+  - code-review
+  - frontend-design
+  - api-design
+
+commands:
+  - check-file
+  - summarize
+  - generate-types
+  - scaffold-component
+
+providers:
+  - opencode
+  - claude-code
+  - copilot
+
+provider_config:
+  opencode:
+    theme: dark
+    mcp:
+      context7:
+        type: remote
+        url: https://mcp.context7.com/mcp
+        enabled: true
+      exa:
+        type: remote
+        url: https://mcp.exa.ai/mcp
+        enabled: true
+  claude-code:
+    permissions:
+      allow:
+        - "Read(**)"
+        - "Write(src/**)"
+        - "Bash(npm test)"
+        - "Bash(npm run build)"

@@ -5,7 +5,7 @@
  * Exits early if config already exists unless --force is passed.
  *
  * Flags:
- *   --global      Write config to ~/.config/asdm/config.json instead of .asdm.json.
+ *   --local       Write config to .asdm.json instead of the global ~/.config/asdm/config.json.
  *   --gitignore   Automatically add ASDM output dirs to .gitignore after init.
  *   (omitted)     In a TTY, prints a tip to run `asdm gitignore` manually.
  *
@@ -97,9 +97,9 @@ export default defineCommand({
       description: 'Overwrite existing config',
       default: false,
     },
-    global: {
+    local: {
       type: 'boolean',
-      description: 'Write config to ~/.config/asdm/config.json instead of .asdm.json',
+      description: 'Write config to .asdm.json instead of the global config',
       default: false,
     },
     gitignore: {
@@ -141,7 +141,7 @@ export default defineCommand({
       providers = DEFAULT_PROVIDERS
     }
 
-    if (ctx.args.global) {
+    if (!ctx.args.local) {
       const targetPath = getGlobalConfigPath()
       const alreadyExists = await exists(targetPath)
 
@@ -155,7 +155,7 @@ export default defineCommand({
         await createProjectConfigAtPath(targetPath, registry, profile, providers)
         logger.success(`Global config written to ${targetPath}`)
         logger.info(`Registry: ${registry}`)
-        logger.info('Next step: run `asdm sync --global` to install agents, skills, and commands')
+        logger.info('Next step: run `asdm sync` to install agents, skills, and commands')
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
         logger.error(message)
@@ -178,7 +178,7 @@ export default defineCommand({
       await createProjectConfig(cwd, registry, profile, providers)
       logger.success(`Initialized .asdm.json with profile "${profile}"`)
       logger.info(`Registry: ${registry}`)
-      logger.info('Next step: run `asdm sync` to install agents, skills, and commands')
+      logger.info('Next step: run `asdm sync --local` to install to this project')
 
       // Fire-and-forget telemetry after successful init
       const telemetry = new TelemetryWriter(cwd)

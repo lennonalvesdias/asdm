@@ -56,9 +56,9 @@ export default defineCommand({
       description: 'Suppress non-error output',
       default: false,
     },
-    global: {
+    local: {
       type: 'boolean',
-      description: 'Verify files installed to global provider config directories',
+      description: 'Verify project-local files instead of global provider config directories',
       default: false,
     },
     offline: {
@@ -75,7 +75,7 @@ export default defineCommand({
     if (quiet) logger.setQuiet(true)
 
     const telemetry = new TelemetryWriter(cwd)
-    const lockfilePath = ctx.args.global ? getGlobalLockfilePath() : undefined
+    const lockfilePath = ctx.args.local ? undefined : getGlobalLockfilePath()
 
     // Strict mode (git hooks) — only checks file integrity, not version currency.
     // Skips remote version check intentionally so hooks never block on network.
@@ -101,7 +101,7 @@ export default defineCommand({
     // Fetch latest manifest version from registry for outdated detection (exit code 3).
     // Skipped when --offline or --global (global mode has no project config to read).
     let latestManifestVersion: string | undefined
-    if (!ctx.args.offline && !ctx.args.global) {
+    if (!ctx.args.offline && ctx.args.local) {
       latestManifestVersion = await fetchLatestManifestVersion(cwd)
     }
 
@@ -116,7 +116,7 @@ export default defineCommand({
 
       if (result.exitCode === VERIFY_EXIT_CODES.NO_LOCK) {
         logger.warn(lockfilePath ? 'No global lockfile found' : 'No lockfile found (.asdm-lock.json)')
-        logger.info(lockfilePath ? 'Run `asdm sync --global` to initialize' : 'Run `asdm sync` to initialize')
+        logger.info(lockfilePath ? 'Run `asdm sync` to initialize' : 'Run `asdm sync --local` to initialize')
         process.exitCode = VERIFY_EXIT_CODES.NO_LOCK
         return
       }

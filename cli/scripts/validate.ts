@@ -22,7 +22,8 @@ import { parse as parseYaml } from 'yaml'
 import { existsSync } from 'node:fs'
 
 const __filename = fileURLToPath(import.meta.url)
-const ROOT = resolve(dirname(__filename), '..')
+const CLI_ROOT = resolve(dirname(__filename), '..')
+const ROOT = resolve(CLI_ROOT, '..')
 const REGISTRY_DIR = join(ROOT, 'registry')
 
 // --- Types ---

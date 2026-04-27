@@ -15,7 +15,8 @@ import { fileURLToPath } from 'node:url'
 import { parse as parseYaml } from 'yaml'
 
 const __filename = fileURLToPath(import.meta.url)
-const ROOT = resolve(dirname(__filename), '..')
+const CLI_ROOT = resolve(dirname(__filename), '..')
+const ROOT = resolve(CLI_ROOT, '..')
 const REGISTRY_DIR = join(ROOT, 'registry')
 
 // --- Types ---
@@ -204,7 +205,7 @@ async function readPolicy(minCliVersion: string): Promise<ManifestPolicy> {
 async function main(): Promise<void> {
   console.log('🔨 Building ASDM manifest...\n')
 
-  const pkgRaw = await readFile(join(ROOT, 'package.json'), 'utf-8')
+  const pkgRaw = await readFile(join(CLI_ROOT, 'package.json'), 'utf-8')
   const pkg = JSON.parse(pkgRaw) as { version: string }
   const version = pkg.version
 

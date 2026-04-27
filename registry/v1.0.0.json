@@ -1,0 +1,153 @@
+{
+  "$schema": "https://asdm.dev/schemas/manifest.schema.json",
+  "version": "1.0.0",
+  "built_at": "2026-04-01T00:00:00Z",
+  "commit_sha": "0000000000000000000000000000000000000000",
+  "policy": {
+    "locked_fields": ["telemetry", "install_hooks", "auto_verify"],
+    "telemetry": true,
+    "auto_verify": true,
+    "install_hooks": true,
+    "allowed_profiles": ["base", "fullstack-engineer", "data-analytics", "mobile", "security"],
+    "allowed_providers": ["opencode", "claude-code", "copilot"],
+    "min_cli_version": "1.0.0"
+  },
+  "profiles": {
+    "base": {
+      "extends": [],
+      "agents": ["code-reviewer", "documentation-writer"],
+      "skills": ["plan-protocol", "code-review"],
+      "commands": ["check-file", "summarize"]
+    },
+    "fullstack-engineer": {
+      "extends": ["base"],
+      "agents": ["code-reviewer", "documentation-writer", "architect", "test-engineer"],
+      "skills": ["plan-protocol", "code-review", "frontend-design", "api-design"],
+      "commands": ["check-file", "summarize", "generate-types", "scaffold-component"],
+      "providers": ["opencode", "claude-code", "copilot"]
+    },
+    "data-analytics": {
+      "extends": ["base"],
+      "agents": ["code-reviewer", "data-analyst", "documentation-writer"],
+      "skills": ["plan-protocol", "code-review", "data-pipeline"],
+      "commands": ["check-file", "summarize", "analyze-schema"],
+      "providers": ["opencode", "claude-code", "copilot"]
+    },
+    "mobile": {
+      "extends": ["base"],
+      "agents": ["code-reviewer", "documentation-writer", "mobile-engineer"],
+      "skills": ["plan-protocol", "code-review", "mobile-patterns"],
+      "commands": ["check-file", "summarize", "scaffold-component"],
+      "providers": ["opencode", "claude-code", "copilot"]
+    },
+    "security": {
+      "extends": ["base"],
+      "agents": ["code-reviewer", "security-auditor", "documentation-writer"],
+      "skills": ["plan-protocol", "code-review", "threat-modeling"],
+      "commands": ["check-file", "summarize", "audit-deps"],
+      "providers": ["opencode", "claude-code", "copilot"]
+    }
+  },
+  "assets": {
+    "agents/code-reviewer.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "agents/documentation-writer.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "agents/architect.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "agents/test-engineer.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "agents/data-analyst.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "agents/mobile-engineer.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "agents/security-auditor.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "skills/plan-protocol/SKILL.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "skills/code-review/SKILL.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "skills/frontend-design/SKILL.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "skills/api-design/SKILL.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "skills/data-pipeline/SKILL.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "skills/mobile-patterns/SKILL.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "skills/threat-modeling/SKILL.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "commands/check-file.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "commands/summarize.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "commands/generate-types.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "commands/scaffold-component.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "commands/analyze-schema.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    },
+    "commands/audit-deps.asdm.md": {
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "version": "1.0.0"
+    }
+  }
+}

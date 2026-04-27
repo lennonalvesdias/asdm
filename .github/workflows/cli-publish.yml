@@ -30,6 +30,9 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Copy registry from repo root
+        run: npm run copy:registry
+
       - name: Build manifest
         run: npm run build:manifest
 

@@ -1,0 +1,253 @@
+{
+  "$schema": "https://asdm.dev/schemas/manifest.schema.json",
+  "version": "0.1.4",
+  "policy": {
+    "locked_fields": [
+      "telemetry",
+      "install_hooks",
+      "auto_verify"
+    ],
+    "telemetry": true,
+    "auto_verify": true,
+    "install_hooks": true,
+    "allowed_profiles": [
+      "base",
+      "fullstack-engineer",
+      "data-analytics",
+      "mobile",
+      "security"
+    ],
+    "allowed_providers": [
+      "opencode",
+      "claude-code",
+      "copilot"
+    ],
+    "min_cli_version": "0.1.4"
+  },
+  "profiles": {
+    "base": {
+      "agents": [
+        "code-reviewer",
+        "documentation-writer"
+      ],
+      "skills": [
+        "plan-protocol",
+        "code-review"
+      ],
+      "commands": [
+        "check-file",
+        "summarize"
+      ],
+      "providers": [
+        "opencode",
+        "claude-code",
+        "copilot"
+      ]
+    },
+    "data-analytics": {
+      "extends": [
+        "base"
+      ],
+      "agents": [
+        "code-reviewer",
+        "data-analyst",
+        "documentation-writer"
+      ],
+      "skills": [
+        "plan-protocol",
+        "code-review",
+        "data-pipeline"
+      ],
+      "commands": [
+        "check-file",
+        "summarize",
+        "analyze-schema"
+      ],
+      "providers": [
+        "opencode",
+        "claude-code",
+        "copilot"
+      ]
+    },
+    "fullstack-engineer": {
+      "extends": [
+        "base"
+      ],
+      "agents": [
+        "code-reviewer",
+        "documentation-writer",
+        "architect",
+        "test-engineer"
+      ],
+      "skills": [
+        "plan-protocol",
+        "code-review",
+        "frontend-design",
+        "api-design"
+      ],
+      "commands": [
+        "check-file",
+        "summarize",
+        "generate-types",
+        "scaffold-component"
+      ],
+      "providers": [
+        "opencode",
+        "claude-code",
+        "copilot"
+      ]
+    },
+    "mobile": {
+      "extends": [
+        "base"
+      ],
+      "agents": [
+        "code-reviewer",
+        "documentation-writer",
+        "mobile-engineer"
+      ],
+      "skills": [
+        "plan-protocol",
+        "code-review",
+        "mobile-patterns"
+      ],
+      "commands": [
+        "check-file",
+        "summarize",
+        "scaffold-component"
+      ],
+      "providers": [
+        "opencode",
+        "claude-code",
+        "copilot"
+      ]
+    },
+    "security": {
+      "extends": [
+        "base"
+      ],
+      "agents": [
+        "code-reviewer",
+        "security-auditor",
+        "documentation-writer"
+      ],
+      "skills": [
+        "plan-protocol",
+        "code-review",
+        "threat-modeling"
+      ],
+      "commands": [
+        "check-file",
+        "summarize",
+        "audit-deps"
+      ],
+      "providers": [
+        "opencode",
+        "claude-code",
+        "copilot"
+      ]
+    }
+  },
+  "assets": {
+    "agents/architect.asdm.md": {
+      "sha256": "cac0b010fd350f9d23bfbb090327dc2e8e971be9daafa764269619224c5ca742",
+      "size": 3011,
+      "version": "1.0.0"
+    },
+    "agents/code-reviewer.asdm.md": {
+      "sha256": "682c73710a84ad8c40e3d8548f82811390ce3db32c6f136116afcde7f87fc75d",
+      "size": 2911,
+      "version": "1.0.0"
+    },
+    "agents/data-analyst.asdm.md": {
+      "sha256": "bb0ce105b9dd19eaef3be5d6b76f5ad273b4b95057d3bb2c998acbaf3dfc7589",
+      "size": 2865,
+      "version": "1.0.0"
+    },
+    "agents/documentation-writer.asdm.md": {
+      "sha256": "05f22780898bdc7dc9e842caab967241b99e02ca7d43d30b09ca8d19fc85d63a",
+      "size": 2788,
+      "version": "1.0.0"
+    },
+    "agents/mobile-engineer.asdm.md": {
+      "sha256": "ab51f952dcc8ce72cf3f48359e11c30fc7a3f5b32b534e56b04ee47cd382c3bd",
+      "size": 2903,
+      "version": "1.0.0"
+    },
+    "agents/security-auditor.asdm.md": {
+      "sha256": "8285378a7b30009a02f537d9fc882344c50444c1c1fe1b0ff35b8e49e475b2eb",
+      "size": 3167,
+      "version": "1.0.0"
+    },
+    "agents/test-engineer.asdm.md": {
+      "sha256": "e23266b82c0e3ccb96d613167c3c27d88651ff159fcb8e9b8eaf34b125681278",
+      "size": 2811,
+      "version": "1.0.0"
+    },
+    "skills/api-design/SKILL.asdm.md": {
+      "sha256": "637fc8014c22ddd8fa9122a44eb68cef70ffecfed724e8535b8d7d54091c579c",
+      "size": 3506,
+      "version": "1.0.0"
+    },
+    "skills/code-review/SKILL.asdm.md": {
+      "sha256": "de2011667b7f9e5c07cef878d43e85bb2d9fa2109c4ba64e161b6038012fab20",
+      "size": 3112,
+      "version": "1.0.0"
+    },
+    "skills/data-pipeline/SKILL.asdm.md": {
+      "sha256": "35e45153c4eafc4f1654b46865a226509634b3659365b03e19de482d10233699",
+      "size": 3686,
+      "version": "1.0.0"
+    },
+    "skills/frontend-design/SKILL.asdm.md": {
+      "sha256": "9cdddedd6f2b6caa8bafb8f8fa9864b6473c89170c4feedd05aaa9f1a30a8d3f",
+      "size": 3267,
+      "version": "1.0.0"
+    },
+    "skills/mobile-patterns/SKILL.asdm.md": {
+      "sha256": "9f336da4b1979cbdadad95012a4347f0e9830597f60e98e9084d6a0d07459acd",
+      "size": 3561,
+      "version": "1.0.0"
+    },
+    "skills/plan-protocol/SKILL.asdm.md": {
+      "sha256": "c0226a04e91caedc6dd9b51946508b9c05c29b51aa3402217c176161c0e7a16c",
+      "size": 2781,
+      "version": "1.0.0"
+    },
+    "skills/threat-modeling/SKILL.asdm.md": {
+      "sha256": "255ec1cc1773315b994bff8f09e647750210bc34f233c5ff83053fb6568f67e5",
+      "size": 4256,
+      "version": "1.0.0"
+    },
+    "commands/analyze-schema.asdm.md": {
+      "sha256": "2c855b9b02257cecc71c5a03faa05da52e215df148aa141c9258db8e0d2b6174",
+      "size": 2538,
+      "version": "1.0.0"
+    },
+    "commands/audit-deps.asdm.md": {
+      "sha256": "b5d54e07d9596b996090aae8e83476fb2d53b62301dd3feef82facd3d08f7150",
+      "size": 2781,
+      "version": "1.0.0"
+    },
+    "commands/check-file.asdm.md": {
+      "sha256": "3090793fb1eb3484626f7a4c9569df87ff486586e2e3f4046c15749003a4af73",
+      "size": 1700,
+      "version": "1.0.0"
+    },
+    "commands/generate-types.asdm.md": {
+      "sha256": "d1b1401c495410ee68aedc055700cfb11794228d8f363bdf6463b75e58bdff20",
+      "size": 2259,
+      "version": "1.0.0"
+    },
+    "commands/scaffold-component.asdm.md": {
+      "sha256": "312cf07c16a44fe334037281213aed99d8410070acbfe35e6ae0968ec8a5263f",
+      "size": 2327,
+      "version": "1.0.0"
+    },
+    "commands/summarize.asdm.md": {
+      "sha256": "0f52ab9a25f6f802aa2a9025d8a4e9a5825aa04ba94173884bb189566ad07ad0",
+      "size": 1919,
+      "version": "1.0.0"
+    }
+  }
+}

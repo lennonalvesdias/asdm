@@ -6,7 +6,7 @@
  *
  * Options:
  *   --dry-run         Preview what would be removed without deleting
- *   --global          Clean files installed to global provider config dirs
+ *   --local           Clean project-local files instead of global provider config dirs
  *   --target <name>   Only clean files for a specific provider (opencode | claude-code | copilot)
  */
 
@@ -68,9 +68,9 @@ export default defineCommand({
       description: 'Preview what would be removed without deleting',
       default: false,
     },
-    global: {
+    local: {
       type: 'boolean',
-      description: 'Clean files installed to global provider config directories',
+      description: 'Clean project-local files instead of global provider config directories',
       default: false,
     },
     target: {
@@ -83,18 +83,18 @@ export default defineCommand({
     const cwd = process.cwd()
     const dryRun = ctx.args['dry-run']
     const target = ctx.args.target as string | undefined
-    const isGlobal = ctx.args.global ?? false
+    const isLocal = ctx.args.local ?? false
 
     if (dryRun) {
       logger.info('Dry run — no files will be removed')
     }
 
-    if (isGlobal) {
-      await runGlobalClean(dryRun, target)
+    if (isLocal) {
+      await runLocalClean(cwd, dryRun, target)
       return
     }
 
-    await runLocalClean(cwd, dryRun, target)
+    await runGlobalClean(dryRun, target)
   },
 })
 
@@ -214,7 +214,7 @@ async function runGlobalClean(dryRun: boolean, target: string | undefined): Prom
     const suffix = target ? ` (${target})` : ''
     logger.success(`Cleaned ${removed} globally managed file(s)${suffix} — ${formatBytes(totalBytesFreed)} freed`)
     if (skippedMissing > 0) logger.dim(`  ${skippedMissing} file(s) were already missing`)
-    logger.info('Run `asdm sync --global` to reinstall')
+    logger.info('Run `asdm sync` to reinstall')
   }
 }
 

@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - 'cli/**'
+      - 'registry/**'
       - '.github/workflows/cli-ci.yml'
   pull_request:
     branches: [main]
     paths:
       - 'cli/**'
+      - 'registry/**'
       - '.github/workflows/cli-ci.yml'
 
 jobs:
@@ -36,6 +38,8 @@ jobs:
         run: npm run typecheck
       - name: Run tests
         run: npm test
+      - name: Copy registry
+        run: npm run copy:registry
       - name: Validate registry
         run: npm run validate:registry
 

@@ -1,0 +1,55 @@
+name: base
+description: "Minimal base profile with essential agents"
+
+agents:
+  - code-reviewer
+  - documentation-writer
+
+skills:
+  - plan-protocol
+  - code-review
+
+commands:
+  - check-file
+  - summarize
+
+providers:
+  - opencode
+  - claude-code
+  - copilot
+  - agents-dir
+
+provider_config:
+  opencode:
+    model: github-copilot/claude-sonnet-4.6
+    small_model: github-copilot/claude-haiku-4.5
+    agent:
+      plan:
+        model: github-copilot/claude-opus-4.6
+        temperature: 0.3
+        reasoningEffort: high
+        textVerbosity: low
+        permission:
+          edit: deny
+          write: deny
+          bash:
+            "*": deny
+          task: allow
+      build:
+        model: github-copilot/claude-sonnet-4.6
+        temperature: 0.3
+        reasoningEffort: medium
+        textVerbosity: low
+        permission:
+          edit: deny
+          write: deny
+          bash:
+            "*": deny
+          task: allow
+    permission:
+      task: deny
+      webfetch: deny
+    plugin:
+      - "@tarquinen/opencode-dcp@1.2.7"
+      - "@franlol/opencode-md-table-formatter@0.0.3"
+      - "@plannotator/opencode@latest"

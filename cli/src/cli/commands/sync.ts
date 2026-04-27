@@ -3,6 +3,9 @@
  *
  * Downloads agents, skills, and commands from the configured registry,
  * verifies SHA-256 integrity, and emits provider-native files.
+ *
+ * Default: installs to global provider config directories using ~/.config/asdm/config.json.
+ * Use --local to install to the current project using .asdm.json.
  */
 
 import { defineCommand } from 'citty'
@@ -17,24 +20,25 @@ import { ConfigError } from '../../utils/errors.js'
  * Resolve the config file path to use for sync.
  *
  * Resolution order:
- *   1. Local .asdm.json (always checked first)
- *   2. Global ~/.config/asdm/config.json (only if --global and no local config)
- *   3. ConfigError if neither is found
+ *   1. --local flag → local .asdm.json (error if not found)
+ *   2. Default → global ~/.config/asdm/config.json (error if not found)
  */
-async function resolveConfigPath(cwd: string, isGlobal: boolean): Promise<string> {
-  const localPath = path.join(cwd, '.asdm.json')
-  if (await exists(localPath)) return localPath
-
-  if (isGlobal) {
-    const globalPath = getGlobalConfigPath()
-    if (await exists(globalPath)) return globalPath
+async function resolveConfigPath(cwd: string, isLocal: boolean): Promise<string> {
+  if (isLocal) {
+    const localPath = path.join(cwd, '.asdm.json')
+    if (await exists(localPath)) return localPath
+    throw new ConfigError(
+      'No .asdm.json found in current directory.',
+      'Run `asdm init --local` to initialize this project.'
+    )
   }
 
+  const globalPath = getGlobalConfigPath()
+  if (await exists(globalPath)) return globalPath
+
   throw new ConfigError(
-    'No config found.',
-    isGlobal
-      ? 'Run `asdm init` (project) or `asdm init --global` (machine-wide setup).'
-      : 'Run `asdm init` to initialize this project.'
+    'No global config found.',
+    'Run `asdm init` to set up global config, or use `asdm sync --local` for project-local sync.'
   )
 }
 
@@ -68,9 +72,9 @@ export default defineCommand({
       type: 'string',
       description: 'Sync only for a specific provider',
     },
-    global: {
+    local: {
       type: 'boolean',
-      description: 'Install to global provider config directories instead of project-local folders',
+      description: 'Sync using .asdm.json and install to project-local folders instead of global dirs',
       default: false,
     },
   },
@@ -78,6 +82,7 @@ export default defineCommand({
     const cwd = process.cwd()
     const dryRun = ctx.args['dry-run']
     const verbose = ctx.args.verbose
+    const isLocal = ctx.args.local ?? false
 
     if (verbose) logger.setVerbose(true)
 
@@ -90,7 +95,7 @@ export default defineCommand({
     const telemetry = new TelemetryWriter(cwd)
 
     try {
-      const configPath = await resolveConfigPath(cwd, ctx.args.global ?? false)
+      const configPath = await resolveConfigPath(cwd, isLocal)
 
       const result = await sync({
         cwd,
@@ -99,7 +104,7 @@ export default defineCommand({
         dryRun,
         verbose,
         provider: ctx.args.provider,
-        global: ctx.args.global ?? false,
+        global: !isLocal,
         clean: ctx.args.clean,
         telemetry,
       })

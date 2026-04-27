@@ -1,0 +1,24 @@
+name: mobile
+description: "Mobile development profile (React Native / Flutter)"
+extends:
+  - base
+
+agents:
+  - code-reviewer
+  - documentation-writer
+  - mobile-engineer
+
+skills:
+  - plan-protocol
+  - code-review
+  - mobile-patterns
+
+commands:
+  - check-file
+  - summarize
+  - scaffold-component
+
+providers:
+  - opencode
+  - claude-code
+  - copilot

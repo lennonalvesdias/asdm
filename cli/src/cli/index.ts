@@ -25,6 +25,8 @@ import hooksCommand from './commands/hooks.js'
 import gitignoreCommand from './commands/gitignore.js'
 import telemetryCommand from './commands/telemetry.js'
 import templatesCommand from './commands/templates.js'
+import updateCommand from './commands/update.js'
+import setupCommand from './commands/setup.js'
 import { checkForUpdate } from '../core/version-check.js'
 
 const rootCommand = defineCommand({
@@ -50,6 +52,8 @@ const rootCommand = defineCommand({
     gitignore: gitignoreCommand,
     telemetry: telemetryCommand,
     templates: templatesCommand,
+    update: updateCommand,
+    setup: setupCommand,
   },
 })
 

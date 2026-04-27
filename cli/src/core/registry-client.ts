@@ -6,8 +6,16 @@
  *
  * Registry URL format: github://{org}/{repo}
  * Translates to: https://api.github.com/repos/{org}/{repo}/releases/latest
+ *
+ * Token resolution order:
+ *   1. Explicit token passed in options
+ *   2. `gh auth token` (GitHub CLI — works for both public and private repos)
+ *   3. GITHUB_TOKEN environment variable
+ *   4. ASDM_GITHUB_TOKEN environment variable
  */
 
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import { ConfigError, NetworkError, RegistryError } from '../utils/errors.js'
 import { parseRegistryUrl } from './config.js'
 import type { AsdmManifest } from './manifest.js'
@@ -16,14 +24,35 @@ const GITHUB_API_BASE = 'https://api.github.com'
 const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com'
 const FETCH_TIMEOUT_MS = 10_000
 
+const execFileAsync = promisify(execFile)
+
 export interface RegistryClientOptions {
-  token?: string        // GitHub token (GITHUB_TOKEN or ASDM_GITHUB_TOKEN)
+  token?: string        // Explicit GitHub token (overrides auto-detection)
   timeout?: number      // Request timeout in ms (default: 30000)
   maxRetries?: number   // Max retry attempts (default: 3)
 }
 
-function getGithubToken(): string | undefined {
-  return process.env['ASDM_GITHUB_TOKEN'] ?? process.env['GITHUB_TOKEN']
+/**
+ * Resolve a GitHub token from all available sources, in priority order:
+ *   1. gh auth token (GitHub CLI — preferred, supports private repos transparently)
+ *   2. GITHUB_TOKEN environment variable
+ *   3. ASDM_GITHUB_TOKEN environment variable
+ */
+async function resolveGithubToken(): Promise<string | undefined> {
+  // 1. Try gh CLI
+  try {
+    const { stdout } = await execFileAsync('gh', ['auth', 'token'], {
+      timeout: 5000,
+      windowsHide: true,
+    })
+    const token = stdout.trim()
+    if (token) return token
+  } catch {
+    // gh not installed or not authenticated — fall through
+  }
+
+  // 2. Environment variable fallback
+  return process.env['GITHUB_TOKEN'] ?? process.env['ASDM_GITHUB_TOKEN']
 }
 
 function buildHeaders(token?: string): Record<string, string> {
@@ -32,9 +61,8 @@ function buildHeaders(token?: string): Record<string, string> {
     'X-GitHub-Api-Version': '2022-11-28',
     'User-Agent': 'asdm-cli/0.1.0',
   }
-  const tok = token ?? getGithubToken()
-  if (tok) {
-    headers['Authorization'] = `Bearer ${tok}`
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
   }
   return headers
 }
@@ -89,7 +117,8 @@ async function fetchWithRetry(
 export class RegistryClient {
   private readonly org: string
   private readonly repo: string
-  private readonly options: Required<RegistryClientOptions>
+  private readonly options: Required<Omit<RegistryClientOptions, 'token'>> & { token?: string }
+  private resolvedToken: string | undefined | null = null  // null = not yet resolved
 
   constructor(registryUrl: string, options: RegistryClientOptions = {}) {
     const parsed = parseRegistryUrl(registryUrl)
@@ -102,14 +131,29 @@ export class RegistryClient {
     this.org = parsed.org
     this.repo = parsed.repo
     this.options = {
-      token: options.token ?? getGithubToken() ?? '',
+      token: options.token,
       timeout: options.timeout ?? 30000,
       maxRetries: options.maxRetries ?? 3,
     }
   }
 
-  private get headers() {
-    return buildHeaders(this.options.token || undefined)
+  /** Resolve the token lazily — called once and cached. */
+  private async getToken(): Promise<string | undefined> {
+    if (this.resolvedToken !== null) return this.resolvedToken
+    // Explicit token takes priority over auto-detection
+    if (this.options.token) {
+      this.resolvedToken = this.options.token
+    } else {
+      this.resolvedToken = await resolveGithubToken()
+    }
+    return this.resolvedToken ?? undefined
+  }
+
+  private async getHeaders(accept?: string): Promise<Record<string, string>> {
+    const token = await this.getToken()
+    const headers = buildHeaders(token)
+    if (accept) headers['Accept'] = accept
+    return headers
   }
 
   /**
@@ -121,7 +165,7 @@ export class RegistryClient {
 
     const response = await fetchWithRetry(
       url,
-      { headers: this.headers },
+      { headers: await this.getHeaders() },
       this.options.maxRetries
     )
 
@@ -136,7 +180,7 @@ export class RegistryClient {
       throw new RegistryError(
         `Failed to fetch latest release: HTTP ${response.status}`,
         response.status === 401
-          ? 'Set GITHUB_TOKEN or ASDM_GITHUB_TOKEN environment variable'
+          ? 'Run `gh auth login` or set GITHUB_TOKEN / ASDM_GITHUB_TOKEN'
           : 'Check registry URL and permissions'
       )
     }
@@ -156,7 +200,7 @@ export class RegistryClient {
 
     const manifestResponse = await fetchWithRetry(
       manifestAsset.url,
-      { headers: { ...this.headers, 'Accept': 'application/octet-stream' } },
+      { headers: await this.getHeaders('application/octet-stream') },
       this.options.maxRetries
     )
 
@@ -164,7 +208,7 @@ export class RegistryClient {
       throw new RegistryError(
         `Failed to download manifest.json: HTTP ${manifestResponse.status}`,
         manifestResponse.status === 401 || manifestResponse.status === 404
-          ? 'Set GITHUB_TOKEN or ASDM_GITHUB_TOKEN with repo scope for private repositories'
+          ? 'Run `gh auth login` or set GITHUB_TOKEN / ASDM_GITHUB_TOKEN with repo scope for private repositories'
           : undefined
       )
     }
@@ -184,7 +228,7 @@ export class RegistryClient {
 
     const response = await fetchWithRetry(
       url,
-      { headers: this.headers },
+      { headers: await this.getHeaders() },
       this.options.maxRetries
     )
 
@@ -214,7 +258,7 @@ export class RegistryClient {
       const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
       let response: Response
       try {
-        response = await fetch(url, { headers: this.headers, signal: controller.signal })
+        response = await fetch(url, { headers: await this.getHeaders(), signal: controller.signal })
       } finally {
         clearTimeout(timer)
       }

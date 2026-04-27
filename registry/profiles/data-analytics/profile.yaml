@@ -1,0 +1,24 @@
+name: data-analytics
+description: "Data science and analytics profile"
+extends:
+  - base
+
+agents:
+  - code-reviewer
+  - data-analyst
+  - documentation-writer
+
+skills:
+  - plan-protocol
+  - code-review
+  - data-pipeline
+
+commands:
+  - check-file
+  - summarize
+  - analyze-schema
+
+providers:
+  - opencode
+  - claude-code
+  - copilot
