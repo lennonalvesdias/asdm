@@ -51,7 +51,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "citty": "^0.1.6",
+    "citty": "^0.2.2",
     "opencode-ai": "^1.14.26",
     "yaml": "^2.7.0"
   },
